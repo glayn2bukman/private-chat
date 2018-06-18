@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>GHFU</title>
+
+        <script>
+            //
+            var IP = "45.33.74.38", 
+                PORT = 60101;
+            
+            function route()
+            {
+                window.location.href="http://"+IP+":"+PORT+"/";
+            }
+            
+            function ping()
+            {
+                var req = new XMLHttpRequest();
+                
+                req.open("GET", "http://"+IP+":"+PORT+"/status", true);
+                req.onload = route;
+
+                req.send();
+            }
+            
+            window.onload = function () {
+                setInterval(ping, 500);
+                
+                setTimeout(
+                    function(){
+                        document.getElementById("connection_error").style.display = "block";
+                    }, 
+                    
+                    2000
+                );
+            }
+            
+        </script>
+
+    </head>
+
+    <body>
+        <fieldset id="connection_error" style="display:none;">
+            <legend style="color:#777; margin:5px; font-weight:bold;">Oops!</legend>
+            Hello there,<br>
+            <p>
+                It looks like you are offline. I know you din't intentionally mean to be and i also 
+                don't mean to be pushy but you have to be connected to Internet to use this application my dear       
+            </p> 
+            
+            <p>
+                Please ensure that you are connected and when you do, just sit tight because
+                the app will automatically connect you to our server! well wishes my dear ...
+            </p>
+        </fieldset>
+        
+    </body>
+
+</html>
