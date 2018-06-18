@@ -25,7 +25,7 @@
     <allow-intent href="market:*" />
 
 
-    <icon src="data/logo128x128.png" gap:role="default" />
+    <icon src="data/logo.png" gap:role="default" />
 
     <plugin name="cordova-plugin-whitelist" />
 
