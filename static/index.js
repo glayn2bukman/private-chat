@@ -1055,7 +1055,7 @@ window.onload = function() {
     
     setInterval(check_online_status, CHECK_ONLINE_STATUS_RATE*1000);
 
-    if (document.getElementById("__uname__").value!="{{__UNAME__}}")
+    if (document.getElementById("__uname__").value.length)
     {
         login_embedded(document.getElementById("__uname__").value, document.getElementById("__group__").value);
     }
