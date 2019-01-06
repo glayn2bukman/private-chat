@@ -1,0 +1,30 @@
+/*Space: Dark Galaxy*/
+/*Space/dark-galaxy.jpg*/
+
+.incoming{
+    color: #f1f3ce;    
+    border: 1px solid orange;
+}
+
+.outgoing{
+    color: #f1f3ce;
+    border: 1px solid green;
+}
+
+.sender{
+    color: #e4ea8c;
+    opacity: 0.5;
+}
+
+.msg{
+}
+
+.time{
+    color: #e4ea8c;
+    opacity: 0.5;
+}
+
+
+.date{
+    color: #ad8;
+}

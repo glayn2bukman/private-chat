@@ -1,0 +1,37 @@
+/*Art: Monkey City*/
+/*Art/art2.jpg*/
+
+.incoming{
+    color: #ddd;    
+    border: 1px solid orange;
+    
+    background: #643;
+
+    opacity: 0.9;
+}
+
+.outgoing{
+    color: #fff;
+    border: 1px solid black;
+
+    background: #444;
+    
+    opacity: 0.9;
+}
+
+.sender{
+    color: #fff;
+    opacity: 0.8;
+}
+
+.msg{
+}
+
+.time{
+    color: #fff;
+    opacity: 0.8;
+}
+
+.date{
+    color: #f33;
+}

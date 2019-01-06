@@ -1,0 +1,37 @@
+/*Animal: Blue-Grey Lion*/
+/*Animals/lion.jpg*/
+
+.incoming{
+    color: #ddd;    
+
+    background: #100;
+    
+    opacity: 0.8;
+}
+
+.outgoing{
+    color: #ddd;
+
+    background: #010;
+    
+    opacity: 0.8;
+}
+
+.sender{
+    color: #f00;
+    opacity: 0.9;
+}
+
+.msg{
+}
+
+.time{
+    color: #f00;
+    opacity: 0.9;
+}
+
+.date{
+    color: #472;
+    background: #fff;
+    border-radius: 7px;
+}

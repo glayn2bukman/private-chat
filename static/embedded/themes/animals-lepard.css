@@ -1,0 +1,37 @@
+/*Animal: Leopard*/
+/*Animals/leopard.jpg*/
+
+.incoming{
+    color: #000;
+    
+    background: #baa;
+    
+    opacity: 0.9;
+}
+
+.outgoing{
+    color: #111;
+    
+    background: #787;
+    
+    opacity: 0.9;
+}
+
+.sender{
+    color: #111;
+    opacity: 0.7;
+}
+
+.msg{
+}
+
+.time{
+    color: #111;
+    opacity: 0.7;
+}
+
+.date{
+    color: #472;
+    background: #fff;
+    border-radius: 7px;
+}
