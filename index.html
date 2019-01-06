@@ -1,60 +1,217 @@
 <!doctype html>
 <html>
     <head>
-        <meta charset="utf-8">
-        <title>GHFU</title>
+        <meta charset="utf-8">        
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+
+
+        <title>Private Chat</title>
+    
+        <link rel="stylesheet" href="static/bootstrap-3.3.7/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" href="static/index.css">
+
+        <!-- jQuery library -->
+        <script src="static/jquery-3.3.1.min.js"></script>
+
+        <!-- Latest compiled JavaScript -->
+        <script src="static/bootstrap-3.3.7/dist/js/bootstrap.min.js"></script>    
+
+        <script src="static/globals.js"></script>
+        <script src="static/index.js"></script>
+
+        <link rel="stylesheet" href="static/rotate.css">
+
+        <!-- sweet alert -->
+        <script src="static/sweetalert/sweetalert.min.js"></script>
+        <link rel="stylesheet" href="static/sweetalert/sweetalert.css">
+
+        <link id="theme" rel="stylesheet" href="">
 
         <script>
-            //
-            var IP = "45.33.74.38", 
-                PORT = 60101;
-            
-            function route()
-            {
-                window.location.href="http://"+IP+":"+PORT+"/";
-            }
-            
-            function ping()
-            {
-                var req = new XMLHttpRequest();
+            $(document).ready(function () {
+              $(".navbar-nav li div").click(function(event) {
+                $(".navbar-collapse").collapse('hide');
+              });
+            });
                 
-                req.open("GET", "http://"+IP+":"+PORT+"/status", true);
-                req.onload = route;
-
-                req.send();
-            }
-            
-            window.onload = function () {
-                setInterval(ping, 500);
-                
-                setTimeout(
-                    function(){
-                        document.getElementById("connection_error").style.display = "block";
-                    }, 
-                    
-                    2000
-                );
-            }
-            
         </script>
+
 
     </head>
 
     <body>
-        <fieldset id="connection_error" style="display:none;">
-            <legend style="color:#777; margin:5px; font-weight:bold;">Oops!</legend>
-            Hello there,<br>
-            <p>
-                It looks like you are offline. I know you din't intentionally mean to be and i also 
-                don't mean to be pushy but you have to be connected to Internet to use this application my dear       
-            </p> 
+        <div id="preview_div" style="display:none">
+            <img id="preview-img" class="img-responsive" style="margin:0 auto;"/>
+            <div style="
+                color:blue; 
+                font-weight:bold; 
+                text-align:right; 
+                width:100%;"
+                
+                onclick="done_previewing()">done</div>
+        </div>
+        
+        <div id="logout" onclick="back()"></div>
+        <div id="online_state" class="blink" style="display:none"></div>
+        
+        <div id="uploading" style="display:none">Uploading Files: <span id="upload_progress">0.00%</span></div>
+        <div id="notification" style="display:none"></div>
+
+        <div class="modal fade" id="attachment_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-dialog" style="width:90%;" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Media Caption</h4>
+              </div>
+              <div class="modal-body">
+                    <div class="form-group">
+                        <input id="caption" type="text" class="form-control" 
+                            placeholder="type caption here">
+                    </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-danger" 
+                    data-dismiss="modal" onclick="cancel_attachment()">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="send_attachment()">Send</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal fade" id="themes_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-dialog" style="width:90%;" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Themes</h4>
+              </div>
+              <div class="modal-body" style="overflow: auto; max-height: 250px;">
+                    <div id="themes"></div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal">Done</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal fade" id="settings_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-dialog" style="width:90%;" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Settings</h4>
+              </div>
+              <div class="modal-body">
+                    <div class="setting" onclick="edit_account()">1) Account Password</div>
+                    <!--<div class="setting">Logout Delay</div>-->
+                    <div class="setting" style="border-bottom:0px;"
+                        onclick="
+                        hide_modal('settings_modal');
+                        show_modal('themes_modal');">2) Themes</div>
+                    <div class="setting" onclick="edit_max_inbox()">3) Inbox Limit</div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-dismiss="modal">Back</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div id="main_div">
+            <div id="login-div" class="container" style="display:block;">
+                
+                <p>.</p>
+                <p>.</p>
+                
+                <img id="logo" class="img-circle img-responsive center-block" 
+                    src="static/icons/hearts.png" width="100" height="100">
+                            
+                <p>.</p>
+                <p>.</p>
+
+                <form>
+                    <div class="input-group">
+                        <span class="input-group-addon" style="opacity:0.8;"
+                            ><i class="glyphicon glyphicon-user"></i></span>
+                        <input id="uname" type="text" class="form-control" 
+                            name="uname" placeholder="Username"
+                            style="opacity:0.8;">
+                    </div>
+                    
+                    <p></p>
+                    
+                    <div class="input-group">
+                        <span class="input-group-addon" style="opacity:0.8;"
+                            ><i class="glyphicon glyphicon-lock"></i></span>
+                        <input id="pswd" type="password" class="form-control" 
+                            name="pswd" placeholder="Password"
+                            style="opacity:0.8;">
+                    </div>
+
+                    <p></p><p></p>
+
+                    <div class="pager">
+                        <button type="button" class="next btn btn-danger" style="width:50%;"
+                            onclick="login()"
+                        >Login</button>
+                    </div> 
+                    
+                </form>
+
+            </div>
             
-            <p>
-                Please ensure that you are connected and when you do, just sit tight because
-                the app will automatically connect you to our server! well wishes my dear ...
-            </p>
-        </fieldset>
+            <div id="groups-div" style="margin-top:25px; display:none;"></div>
+                        
+            <div id="chats" style="display:none;">
+                <div id="chats-container-div" class="chats-container-div">
+                    
+                    <div class="chats_div">
+                    </div>
+                          
+                </div>
+                
+                <div class="input-group bottom">
+                        <form id="form" method="POST" enctype="multipart/form-data">
+                            <input id="files" name="files" type="file" multiple 
+                                style="display:none;" onchange="show_modal('attachment_modal')">
+                            <input type="hidden" id="_group" name="group">
+                            <input type="hidden" id="_sender" name="sender">
+                            <input type="hidden" id="_msg" name="msg">
+                        </form>
+                    <span class="input-group-addon">
+                        <i class="glyphicon glyphicon-cog"
+                            onclick="show_modal('settings_modal');"></i>
+                    </span>
+                    <span class="input-group-addon">
+                        <i class="glyphicon glyphicon-paperclip"
+                            onclick="document.getElementById('files').click()"></i>
+                    </span>
+                    <input id="entry" type="text" class="form-control" placeholder="type here...">
+                    <span class="input-group-addon">
+                        <i class="glyphicon glyphicon-chevron-right"
+                            onclick="send_message()"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="rotate" id="loading_div"
+            style="
+                position:fixed; 
+                left:45%; 
+                top:45%; 
+                z-index:5; 
+                font-size:2em;
+                color:#0f0;
+                display: none;
+                ">
+            <strong>......</strong>
+        </div>
+
+        <input type="hidden" id="__uname__">
+        <input type="hidden" id="__group__">
         
     </body>
-
 </html>
