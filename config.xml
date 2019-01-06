@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 
-<widget id="org.jerm.chat" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0">
-    <name>Private</name>
+<widget id="org.jerm.pchat" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0">
+    <name>PChat</name>
     <description>Chat-App</description>
 
     <author email="bukman@jermtechnology.com" href="http://www.jermtechnology.com">Jerm Technology</author>
@@ -11,7 +11,7 @@
     <preference name="android-minSdkVersion" value="14"/>
     
     <!-- use latest version of phonegap...this version is displayed in the phonegap web -->
-    <preference name="phonegap-version" value="cli-6.5.0" />
+    <!-- <preference name="phonegap-version" value="cli-6.5.0" /> -->
 
     <allow-navigation href="*" />
     <access origin="*" />
