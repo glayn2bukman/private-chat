@@ -606,11 +606,7 @@ function got_inbox()
         if (!inbox.length)
             return
         
-        if(document.getElementById("vibrate").innerHTML.indexOf(": On")>=0){
-            if(navigator.vibrate){
-                navigator.vibrate(500);
-            }
-        }
+        var vibrated=false;
 
         var chat, sender, msg, time_div;
         var _msg_data;
@@ -667,6 +663,12 @@ function got_inbox()
             }
             else
             {
+                if((!vibrated) && document.getElementById("vibrate").innerHTML.indexOf(": On")>=0){
+                    if(navigator.vibrate){
+                        navigator.vibrate(500);
+                        vibrated=true;
+                    }
+                }
                 chat.setAttribute("class","chat incoming");
                 sender.innerHTML = inbox[i][1];
             }
