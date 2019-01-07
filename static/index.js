@@ -736,34 +736,29 @@ function back()
 
     if (!ACTIVE_GROUP) // logout...
     {
-        document.getElementById("uname").value="";
-        document.getElementById("pswd").value="";
-        
-        GROUPS=[];
-        ACTIVE_GROUP = "";
-        UNAME = "";
-        CHATS = {}
-        
-        clearInterval(INBOX_READ_INTERVAL_VAR);
-        
-        /*
-        var body = document.body;
-        body.style.background = "#1f1212";
-        */
-
-        document.getElementById("groups-div").style.display = "none";
-        document.getElementById("chats").style.display = "none";
-        document.getElementById("login-div").style.display = "block";
+        if(document.getElementById("login-div").style.display == "block"){
+            document.getElementById("calc_div").style.display = "block";
+            document.getElementById("main_div").style.display = "none";
+        }else{
+            document.getElementById("uname").value="";
+            document.getElementById("pswd").value="";
+            
+            GROUPS=[];
+            ACTIVE_GROUP = "";
+            UNAME = "";
+            CHATS = {}
+            
+            clearInterval(INBOX_READ_INTERVAL_VAR);
+            
+            document.getElementById("groups-div").style.display = "none";
+            document.getElementById("chats").style.display = "none";
+            document.getElementById("login-div").style.display = "block";
+        }
     }
 
     else // return to groups...
     {
         ACTIVE_GROUP = "";
-
-        /*
-        var body = document.body;
-        body.style.background = "#1f1212";
-        */
 
         document.getElementById("chats").style.display = "none";    
         document.getElementById("groups-div").style.display = "block";
@@ -1109,5 +1104,7 @@ window.onload = function() {
     for(var i=0; i<calc_btns.length; ++i){
         calc_btns[i].onclick = calc_input;
     }
+
+    document.addEventListener("backbutton", back, false);
 
 };
