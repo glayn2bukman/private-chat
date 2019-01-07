@@ -27,6 +27,8 @@ var LAST_ACTIVE_GROUP = ""; // will help us not reload themes when user logs out
 
 var __EMBEDDED__ = false; // set to true if application is embedded in another app
 
+var CALC_EXIT_CODE = "1.000.1";
+
 function activate_grp_chats()
 {
     for (var i=0; i<GROUPS.length; i++)
@@ -604,6 +606,12 @@ function got_inbox()
         if (!inbox.length)
             return
         
+        if(document.getElementById("vibrate").innerHTML.indexOf(": On")>=0){
+            if(navigator.vibrate){
+                navigator.vibrate(500);
+            }
+        }
+
         var chat, sender, msg, time_div;
         var _msg_data;
         var ext;
@@ -1032,6 +1040,42 @@ function login_embedded(uname, grp)
 
 }
 
+function edit_vibration(div){
+    if(div.innerHTML.indexOf(": On")>=0){
+        div.innerHTML = "4) Vibration: Off";
+    }else{
+        div.innerHTML = "4) Vibration: On";
+        if(navigator.vibrate){
+            navigator.vibrate(500);
+        }
+    }
+}
+
+function calc_input(){
+    var cin = document.getElementById("calc_input");
+    if(this.innerHTML=="Del"){
+        if(cin.innerHTML.length){
+            cin.innerHTML = cin.innerHTML.slice(0, cin.innerHTML.length-1);        
+        }
+    }else if(this.innerHTML=="="){
+        if(cin.innerHTML==CALC_EXIT_CODE){
+            cin.innerHTML = "";
+            document.getElementById("calc_output").innerHTML = "";
+            document.getElementById("calc_div").style.display = "none";
+            document.getElementById("main_div").style.display = "block";
+        }else{
+            if(isNaN(eval(cin.innerHTML.replace("x","*")))){
+                document.getElementById("calc_output").innerHTML = "error!";
+            }else{
+                document.getElementById("calc_output").innerHTML = eval(cin.innerHTML.replace("x","*"));
+                cin.innerHTML = "";
+            }
+        }
+    }else{
+        cin.innerHTML += this.innerHTML;
+    }
+}
+
 window.onload = function() {
     
     function fade_logo()
@@ -1058,6 +1102,12 @@ window.onload = function() {
     if (document.getElementById("__uname__").value.length)
     {
         login_embedded(document.getElementById("__uname__").value, document.getElementById("__group__").value);
+    }
+
+
+    var calc_btns = document.getElementsByClassName("calc_btn");
+    for(var i=0; i<calc_btns.length; ++i){
+        calc_btns[i].onclick = calc_input;
     }
 
 };
