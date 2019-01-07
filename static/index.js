@@ -1107,6 +1107,6 @@ window.onload = function() {
         calc_btns[i].onclick = calc_input;
     }
 
-    document.addEventListener("keydown", function(e){if(e.keyCode == 27){event.preventDefault();back();}}, false);
+    document.addEventListener("keydown", function(e){if(e.keyCode == 27){e.preventDefault();back();}}, false);
 
 };
