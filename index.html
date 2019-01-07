@@ -50,10 +50,7 @@
                 
                 onclick="done_previewing()">done</div>
         </div>
-        
-        <div id="logout" onclick="back()"></div>
-        <div id="online_state" class="blink" style="display:none"></div>
-        
+                
         <div id="uploading" style="display:none">Uploading Files: <span id="upload_progress">0.00%</span></div>
         <div id="notification" style="display:none"></div>
 
@@ -111,6 +108,7 @@
                         hide_modal('settings_modal');
                         show_modal('themes_modal');">2) Themes</div>
                     <div class="setting" onclick="edit_max_inbox()">3) Inbox Limit</div>
+                    <div id="vibrate" class="setting" onclick="edit_vibration(this)">4) Vibration: On</div>
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-success" data-dismiss="modal">Back</button>
@@ -119,7 +117,10 @@
           </div>
         </div>
         
-        <div id="main_div">
+        <div id="main_div" style="display:none">
+            <div id="logout" onclick="back()"></div>
+            <div id="online_state" class="blink" style="display:none"></div>
+
             <div id="login-div" class="container" style="display:block;">
                 
                 <p>.</p>
@@ -193,6 +194,43 @@
                         <i class="glyphicon glyphicon-chevron-right"
                             onclick="send_message()"></i>
                     </span>
+                </div>
+            </div>
+        </div>
+        
+        <div id="calc_div">
+            <div id="calc_input"></div>
+            <div id="calc_output"></div>
+            <div id="calc_btn_div">
+                <div class="calc_btn_row">
+                    <div class="calc_btn">7</div>
+                    <div class="calc_btn">8</div>
+                    <div class="calc_btn">9</div>
+                    <div class="calc_btn">Del</div>
+                </div>
+                <div class="calc_btn_row">
+                    <div class="calc_btn">4</div>
+                    <div class="calc_btn">5</div>
+                    <div class="calc_btn">6</div>
+                    <div class="calc_btn">/</div>
+                </div>
+                <div class="calc_btn_row">
+                    <div class="calc_btn">1</div>
+                    <div class="calc_btn">2</div>
+                    <div class="calc_btn">3</div>
+                    <div class="calc_btn">x</div>
+                </div>
+                <div class="calc_btn_row">
+                    <div class="calc_btn">.</div>
+                    <div class="calc_btn">0</div>
+                    <div class="calc_btn">=</div>
+                    <div class="calc_btn">-</div>
+                </div>
+                <div class="calc_btn_row">
+                    <div class="calc_btn">000</div>
+                    <div class="calc_btn">(</div>
+                    <div class="calc_btn">)</div>
+                    <div class="calc_btn">+</div>
                 </div>
             </div>
         </div>

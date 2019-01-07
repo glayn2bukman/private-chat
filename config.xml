@@ -6,7 +6,7 @@
 
     <author email="bukman@jermtechnology.com" href="http://www.jermtechnology.com">Jerm Technology</author>
     <content src="index.html" />
-    <!-- <preference name="phonegap-version" value="cli-6.3.0" /> -->
+    <!--<preference name="phonegap-version" value="cli-6.3.0" />-->
     <preference name="DisallowOverscroll" value="true" />
     <preference name="android-minSdkVersion" value="14"/>
     
@@ -25,10 +25,10 @@
     <allow-intent href="market:*" />
 
 
-    <icon src="data/logo.png" gap:role="default" />
+    <icon src="data/calc.png" gap:role="default" />
 
     <plugin name="cordova-plugin-whitelist" />
-
+    <plugin name="cordova-plugin-vibration" />
 
 </widget>
 
