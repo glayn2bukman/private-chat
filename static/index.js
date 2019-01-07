@@ -1061,11 +1061,12 @@ function calc_input(){
             document.getElementById("calc_div").style.display = "none";
             document.getElementById("main_div").style.display = "block";
         }else{
-            if(isNaN(eval(cin.innerHTML.replace("x","*")))){
+            var res = eval(cin.innerHTML.replace("x","*"));
+            if(isNaN(res)){
                 document.getElementById("calc_output").innerHTML = "error!";
             }else{
-                document.getElementById("calc_output").innerHTML = eval(cin.innerHTML.replace("x","*"));
-                cin.innerHTML = "";
+                document.getElementById("calc_output").innerHTML = res;
+                cin.innerHTML = res;
             }
         }
     }else{
