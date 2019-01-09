@@ -39,16 +39,18 @@
 
     </head>
 
-    <body>
+    <body oncontextmenu="return false;">
         <div id="preview_div" style="display:none">
-            <img id="preview-img" class="img-responsive" style="margin:0 auto;"/>
-            <div style="
-                color:blue; 
+            <div class="clickable" style="
+                color:#0f0; 
+                background-color:black; 
                 font-weight:bold; 
-                text-align:right; 
-                width:100%;"
+                text-align:center;
+                width:100%;
+                float:right;"
                 
                 onclick="done_previewing()">done</div>
+            <img id="preview-img" class="img-responsive" style="margin:0 auto;"/>
         </div>
                 
         <div id="uploading" style="display:none">Uploading Files: <span id="upload_progress">0.00%</span></div>
@@ -173,7 +175,7 @@
                           
                 </div>
                 
-                <div class="input-group bottom">
+                <div id="bottom" class="input-group bottom">
                         <form id="form" method="POST" enctype="multipart/form-data">
                             <input id="files" name="files" type="file" multiple 
                                 style="display:none;" onchange="show_modal('attachment_modal')">
@@ -187,7 +189,7 @@
                     </span>
                     <span class="input-group-addon">
                         <i class="glyphicon glyphicon-paperclip"
-                            onclick="document.getElementById('files').click()"></i>
+                            onclick="open_emoji_div()"></i>
                     </span>
                     <input id="entry" type="text" class="form-control" placeholder="type here...">
                     <span class="input-group-addon">
@@ -232,6 +234,25 @@
                     <div class="calc_btn">)</div>
                     <div class="calc_btn">+</div>
                 </div>
+            </div>
+        </div>
+
+        <div id="emoji_div" style="display:none;">
+            <div>
+                <span class="clickable" style="color:#ddd;font-weight:bold;margin-left:5px;"
+                    onclick="document.getElementById('files').click()">Attach File...</span>
+                <span class="clickable" style="
+                    color:white;
+                    font-weight:bold;
+                    float:right;
+                    font-size:1em;
+                    margin-right:5px;
+                    background-color:#f00;
+                    border-radius:50%;
+                    width:20px;
+                    text-align:center;
+                    "
+                    onclick="close_emoji_div()">x</span>
             </div>
         </div>
         
