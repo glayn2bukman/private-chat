@@ -1,4 +1,9 @@
-var HOST = "http://45.33.6.237:60101/";
+/*
+    Author: Bukman, glayn2bukman@gmail.com
+    About : This is a private and simple chatting application fi di wolz
+*/
+
+var HOST = "http://0.0.0.0:60101/"//"http://45.33.6.237:60101/";
 var LOGIN_URL = HOST+"login";
 var POST_MESSAGE_URL = HOST+"post_message";
 var INBOX_URL = HOST+"inbox";
@@ -12,6 +17,8 @@ var LOGIN_EMBEDDED_URL = HOST+"../login_embedded";
 var FILE_ATTACHMENT_PATH = HOST+"static/files/";
 var THEMES_PATH = "static/themes/";
 var DEFAULT_THEME = "base.css";
+
+var EMOJI_PATH = "static/emoji/";
 
 var GROUPS=[];
 var ACTIVE_GROUP = "";
@@ -28,6 +35,10 @@ var LAST_ACTIVE_GROUP = ""; // will help us not reload themes when user logs out
 var __EMBEDDED__ = false; // set to true if application is embedded in another app
 
 var CALC_EXIT_CODE = "1.000.1";
+
+var _notification_uname="";
+
+var SUPPORTS_EMOJIS = true;
 
 function activate_grp_chats()
 {
@@ -116,49 +127,45 @@ function media_html(msg)
 {
     var innerHTML = "";
     if(
-        msg.indexOf(".jpg")>=0 ||
-        msg.indexOf(".jpeg")>=0 ||
-        msg.indexOf(".gif")>=0 ||
-        msg.indexOf(".png")>=0
+        msg.toLowerCase().indexOf(".jpg")>=0 ||
+        msg.toLowerCase().indexOf(".jpeg")>=0 ||
+        msg.toLowerCase().indexOf(".gif")>=0 ||
+        msg.toLowerCase().indexOf(".png")>=0
         // image attachment
         )
     {
-        innerHTML += "<div class=\"preload_media_div\" mediatype=\"img\" data=\""+
+        innerHTML += "<div class=\"preload_media_div clickable\" mediatype=\"img\" data=\""+
                          msg+"\" "+
                          "onclick=\"start_loading_media(this)\">Picture</div>"+
                          "<div id=\""+msg+"\" style=\"height:100px;width:150px;border-radius:5px;display:none;\"></div><br>";
-                         /*"<img class=\"img-responsive attachment\" id=\""+
-                         msg+"\" "+
-                         " onload=\"img_loaded(this)\" style=\"height:100px; display:none;\"/><br>";
-                        */
     }
 
     else if(
-        msg.indexOf(".3gpp")>=0 ||
-        msg.indexOf(".mp3")>=0 ||
-        msg.indexOf(".wav")>=0
+        msg.toLowerCase().indexOf(".3gpp")>=0 ||
+        msg.toLowerCase().indexOf(".mp3")>=0  ||
+        msg.toLowerCase().indexOf(".wav")>=0
         // audio attachment
         )
     {
-        innerHTML += "<div class=\"preload_media_div\" data=\""+
+        innerHTML += "<div class=\"preload_media_div clickable\" data=\""+
                          msg+"\" "+
                          "onclick=\"start_loading_media(this)\">Audio</div>"+
                          "<audio controls style=\"max-width:200px; display:none;\" id=\""+
                          msg+
-                         "\"><source src=\"\"> {brocken audio}</audio><br>";
+                         "\"><source src=\""+FILE_ATTACHMENT_PATH+msg+"\"> {brocken audio}</audio><br>";
     }
 
     else if(
-        msg.indexOf(".mp4")>=0
+        msg.toLowerCase().indexOf(".mp4")>=0
         // video attachment
         )
     {
-        innerHTML += "<div class=\"preload_media_div\" data=\""+
+        innerHTML += "<div class=\"preload_media_div clickable\" data=\""+
                          msg+"\" "+
                          "onclick=\"start_loading_media(this)\">Video</div>"+
                          "<video controls style=\"height:100px; display:none; margin-bottom:10px;\" id=\""+
                          msg+
-                         "\"><source src=\"\" type=\"video/mp4\"> {brocken video}</video><br>";
+                         "\"><source src=\""+FILE_ATTACHMENT_PATH+msg+"\" type=\"video/mp4\"> {brocken video}</video><br>";
     }
     
     return innerHTML;
@@ -274,7 +281,30 @@ function attempted_login()
             for (var j=0; j<(_msg_data.length-1); j++)
             {
                 msg.innerHTML += media_html(_msg_data[j]);
-            } msg.innerHTML += _msg_data[_msg_data.length-1];
+            } 
+
+            var _msg = _msg_data[_msg_data.length-1];
+            if(!SUPPORTS_EMOJIS){msg.innerHTML += _msg;}
+            else{
+                if(_msg.indexOf("`")<0){msg.innerHTML += _msg;}
+                else{ // message has emojis
+                    var _msg_parts = _msg.split("`");
+                    var finished = [];
+                    for(var mi=0; mi<_msg_parts.length;++mi){
+                        if(_msg_parts[mi].length && !isNaN(parseInt(_msg_parts[mi])) && finished.indexOf(_msg_parts[mi])<0){
+                            while(_msg.indexOf("`"+_msg_parts[mi]+"`")>=0){
+                                _msg = _msg.replace("`"+_msg_parts[mi]+"`",
+                                    "<img class=\"emoji\" src=\""+EMOJI_PATH+_msg_parts[mi]+".png"+"\">"
+                                );
+                            }
+                            
+                            finished.push(_msg_parts[mi]);
+                        }
+                    }
+                    msg.innerHTML += _msg;
+                }
+            }
+
             
             chat.appendChild(sender);
             chat.appendChild(msg);
@@ -386,6 +416,8 @@ function login()
 
 function sent_message()
 {
+    close_emoji_div();
+
     stop_loading();
 
     if (this.status===200)
@@ -473,7 +505,30 @@ function sent_message()
             for (var j=0; j<(_msg_data.length-1); j++)
             {
                 msg.innerHTML += media_html(_msg_data[j]);
-            } msg.innerHTML += _msg_data[_msg_data.length-1];
+            }
+
+            var _msg = _msg_data[_msg_data.length-1];
+            if(!SUPPORTS_EMOJIS){msg.innerHTML += _msg;}
+            else{
+                if(_msg.indexOf("`")<0){msg.innerHTML += _msg;}
+                else{ // message has emojis
+                    var _msg_parts = _msg.split("`");
+                    var finished = [];
+                    for(var mi=0; mi<_msg_parts.length;++mi){
+                        if(_msg_parts[mi].length && !isNaN(parseInt(_msg_parts[mi])) && finished.indexOf(_msg_parts[mi])<0){
+                            while(_msg.indexOf("`"+_msg_parts[mi]+"`")>=0){
+                                _msg = _msg.replace("`"+_msg_parts[mi]+"`",
+                                    "<img class=\"emoji\" src=\""+EMOJI_PATH+_msg_parts[mi]+".png"+"\">"
+                                );
+                            }
+                            
+                            finished.push(_msg_parts[mi]);
+                        }
+                    }
+                    msg.innerHTML += _msg;
+                }
+            }
+
 
             chat.appendChild(sender);
             chat.appendChild(msg);
@@ -606,7 +661,7 @@ function got_inbox()
         if (!inbox.length)
             return
         
-        var vibrated=false;
+        var vibrated=false, notified=false;
 
         var chat, sender, msg, time_div;
         var _msg_data;
@@ -669,6 +724,25 @@ function got_inbox()
                         vibrated=true;
                     }
                 }
+                if ((!notified) && "Notification" in window) {
+                  _notification_uname = inbox[i][1]
+                  Notification.requestPermission(function (permission) {
+                    // If the user accepts, let’s create a notification
+                    if (permission === "granted") {
+                      var notification = new Notification("PChat", {
+                           tag: "message", 
+                           body: "new msg from "+_notification_uname
+                      }); 
+                      notification.onshow  = function() { console.log("show"); };
+                      notification.onclose = function() { console.log("close"); };
+                      notification.onclick = function() { console.log("click"); };
+                    }
+                    
+                    notified = true;
+
+                  });
+                }
+
                 chat.setAttribute("class","chat incoming");
                 sender.innerHTML = inbox[i][1];
             }
@@ -679,7 +753,30 @@ function got_inbox()
             for (var j=0; j<(_msg_data.length-1); j++)
             {
                 msg.innerHTML += media_html(_msg_data[j]);
-            } msg.innerHTML += _msg_data[_msg_data.length-1];
+            }
+
+            var _msg = _msg_data[_msg_data.length-1];
+            if(!SUPPORTS_EMOJIS){msg.innerHTML += _msg;}
+            else{
+                if(_msg.indexOf("`")<0){msg.innerHTML += _msg;}
+                else{ // message has emojis
+                    var _msg_parts = _msg.split("`");
+                    var finished = [];
+                    for(var mi=0; mi<_msg_parts.length;++mi){
+                        if(_msg_parts[mi].length && !isNaN(parseInt(_msg_parts[mi])) && finished.indexOf(_msg_parts[mi])<0){
+                            while(_msg.indexOf("`"+_msg_parts[mi]+"`")>=0){
+                                _msg = _msg.replace("`"+_msg_parts[mi]+"`",
+                                    "<img class=\"emoji\" src=\""+EMOJI_PATH+_msg_parts[mi]+".png"+"\">"
+                                );
+                            }
+                            
+                            finished.push(_msg_parts[mi]);
+                        }
+                    }
+                    msg.innerHTML += _msg;
+                }
+            }
+            
 
             chat.appendChild(sender);
             chat.appendChild(msg);
@@ -782,7 +879,7 @@ function start_loading_media(media_div)
         var bgImg = new Image();
         bgImg.mom = document.getElementById(target);
         bgImg.onload = img_loaded;
-        bgImg.src = FILE_ATTACHMENT_PATH+target;        
+        bgImg.src = FILE_ATTACHMENT_PATH+target;
     }
     document.getElementById(target).style.display = "block";
 }
@@ -1074,6 +1171,13 @@ function calc_input(){
     }
 }
 
+function close_emoji_div(){
+    document.getElementById("emoji_div").style.display = "none";
+}function open_emoji_div(){
+    document.getElementById("emoji_div").style.display = "block";
+}
+
+
 window.onload = function() {
     
     function fade_logo()
@@ -1109,5 +1213,53 @@ window.onload = function() {
     }
 
     document.addEventListener("keydown", function(e){if(e.keyCode == 27){e.preventDefault();back();}}, false);
+
+    document.getElementById("entry").addEventListener("keyup",function(e){e.preventDefault();if (e.keyCode === 13){send_message();}});
+
+    {
+        // emojis. these should be ignored if version doesnt yet support em
+        function emoji_clicked(){
+            var em = this.src.split("/");
+            em = em[em.length-1];
+            em = em.split(".png");
+            em = "`"+em[0]+"`";
+
+            var entry = document.getElementById("entry");
+
+            if (document.selection) {
+                // IE
+                entry.focus();
+                var sel = document.selection.createRange();
+                sel.em = em;
+            } else if (entry.selectionStart || entry.selectionStart === 0) {
+                // Others
+                var startPos = entry.selectionStart;
+                var endPos = entry.selectionEnd;
+                entry.value = entry.value.substring(0, startPos) +
+                em +
+                entry.value.substring(endPos, entry.value.length);
+                entry.selectionStart = startPos + em.length;
+                entry.selectionEnd = startPos + em.length;
+                entry.focus();
+            } else {
+                entry.value += em;
+            }
+
+            this.style.backgroundColor = "#aaf";
+            setTimeout(function(img){img.style.backgroundColor="";},100,this);
+        }
+        var emoji_div = document.getElementById("emoji_div");
+        var img;
+        for(var i=1; i<=55; ++i){
+            img = document.createElement("img");
+            img.src = EMOJI_PATH+i+".png";
+            img.setAttribute("class","emoji clickable");
+            img.onclick = emoji_clicked;
+            
+            emoji_div.appendChild(img);
+        }
+        
+        document.getElementById("entry").onclick=close_emoji_div;
+    }
 
 };
