@@ -3,7 +3,7 @@
     About : This is a private and simple chatting application fi di wolz
 */
 
-var HOST = "http://45.33.6.237:60101/";
+var HOST = "http://0.0.0.0:60101/"//"http://45.33.6.237:60101/";
 var LOGIN_URL = HOST+"login";
 var POST_MESSAGE_URL = HOST+"post_message";
 var INBOX_URL = HOST+"inbox";
@@ -1250,7 +1250,9 @@ window.onload = function() {
         }
         var emoji_div = document.getElementById("emoji_div");
         var img;
-        for(var i=1; i<=55; ++i){
+        var em_limit = 88;
+        for(var i=1; i<=em_limit; ++i){
+
             img = document.createElement("img");
             img.src = EMOJI_PATH+i+".png";
             img.setAttribute("class","emoji clickable");
