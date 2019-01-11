@@ -163,7 +163,7 @@ function media_html(msg)
         innerHTML += "<div class=\"preload_media_div clickable\" data=\""+
                          msg+"\" "+
                          "onclick=\"start_loading_media(this)\">Video</div>"+
-                         "<video controls style=\"height:100px; display:none; margin-bottom:10px;\" id=\""+
+                         "<video controls style=\"width:100%; display:none; margin-bottom:10px;\" id=\""+
                          msg+
                          "\"><source src=\""+FILE_ATTACHMENT_PATH+msg+"\" type=\"video/mp4\"> {brocken video}</video><br>";
     }
