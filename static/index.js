@@ -3,7 +3,7 @@
     About : This is a private and simple chatting application fi di wolz
 */
 
-var HOST = "http://45.33.6.237:60101/";
+var HOST = /*"http://0.0.0.0:60101/"//*/"http://45.33.6.237:60101/";
 var LOGIN_URL = HOST+"login";
 var POST_MESSAGE_URL = HOST+"post_message";
 var INBOX_URL = HOST+"inbox";
@@ -1264,4 +1264,61 @@ window.onload = function() {
         document.getElementById("entry").onclick=close_emoji_div;
     }
 
+    {
+        // swipe feature for back...
+        var _swipe = {startX:0,startY:0};
+
+        function initSwipe(element,callback,threshold=20){
+            /*
+                callback will be given one argument, swap_data in the form of
+                    {
+                        horizontal: "none|left|right",
+                        vertical  : "none|up|down",
+                        resultant : "none|left|right|up|down"
+                    }
+            */
+            function _get_swipe_directions(dx,dy,threshold){
+                dx = dx<0?((dx>-threshold)?0:dx):((dx<threshold)?0:dx);
+                dy = dy<0?((dy>-threshold)?0:dx):((dy<threshold)?0:dy);
+                
+                var vertical_swipe = (dy>0)?"down":(dy<0?"up":"none");
+                var horizontal_swipe = (dx>0)?"right":(dx<0?"left":"none");
+
+                dy = dy<0?-1*dy:dy;
+                dx = dx<0?-1*dx:dx;
+
+                var direction = dy>dx?vertical_swipe:horizontal_swipe;
+
+                var swipe_data = {horizontal:horizontal_swipe,vertical:vertical_swipe,resultant:direction}
+                
+                return swipe_data;
+                
+            }
+
+            // mobile with touch events
+            element.addEventListener("touchstart",function(e){
+                _swipe.startX=e.changedTouches[0].pageX; _swipe.startY=e.changedTouches[0].pageY;});
+            element.addEventListener("touchend",function(e){
+                var dx = e.changedTouches[0].pageX-_swipe.startX, dy = e.changedTouches[0].pageY-_swipe.startY;
+                callback(_get_swipe_directions(dx,dy,threshold));
+            });
+
+            // PC with mouse events...
+            element.addEventListener("mousedown",function(e){_swipe.startX=e.clientX; _swipe.startY=e.clientY;});
+            element.addEventListener("mouseup",function(e){
+                var dx = e.clientX-_swipe.startX, dy = e.clientY-_swipe.startY
+                callback(_get_swipe_directions(dx,dy,threshold));
+            });
+            
+        }
+
+        initSwipe(document.getElementById("main_div"), function(swipe_data){
+            if(swipe_data.resultant=="right"){back();}
+        },40);        
+
+        initSwipe(document.getElementById("preview_div"), function(swipe_data){
+            if(swipe_data.resultant=="right"){back();}
+        },40);        
+
+    }
 };
