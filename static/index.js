@@ -150,7 +150,7 @@ function media_html(msg)
         innerHTML += "<div class=\"preload_media_div clickable\" data=\""+
                          msg+"\" "+
                          "onclick=\"start_loading_media(this)\">Audio</div>"+
-                         "<audio controls style=\"max-width:200px; display:none;\" id=\""+
+                         "<audio controls style=\"max-width:100%; display:none;\" id=\""+
                          msg+
                          "\"><source src=\""+FILE_ATTACHMENT_PATH+msg+"\"> {brocken audio}</audio><br>";
     }
