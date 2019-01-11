@@ -190,7 +190,7 @@ function attempted_login()
         var chats_div = document.getElementById("chats");
         var chat_div, date_div;
 
-        GROUPS = reply.groups;
+        GROUPS = reply.groups.sort();
         for (var i=0; i<GROUPS.length; i++)
         {
             if(CHATS[GROUPS[i]]==undefined) // entry wasnt present...
