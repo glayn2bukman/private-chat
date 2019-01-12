@@ -1181,7 +1181,13 @@ function close_emoji_div(){
 }
 
 
-window.onload = function(){
+
+document.addEventListener("deviceready", onDeviceReady, false);
+
+function onDeviceReady(){
+    document.addEventListener("backbutton", function (e) {
+        e.preventDefault();
+    }, false );
     
     function fade_logo()
     {
@@ -1325,8 +1331,4 @@ window.onload = function(){
 
     }
 
-    document.addEventListener("backbutton", function(e){
-        e.preventDefault();
-        return false;
-    });
 };
