@@ -1183,7 +1183,7 @@ function close_emoji_div(){
 document.addEventListener("backbutton", onBackKeyDown, false);  
 function onBackKeyDown(e) { 
    e.preventDefault(); 
-   alert('Back Button is Pressed!'); 
+    back();
 }
 
 window.onload = function(){
