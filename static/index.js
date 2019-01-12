@@ -191,6 +191,9 @@ function attempted_login()
         var chat_div, date_div;
 
         GROUPS = reply.groups.sort();
+
+        if(GROUPS.indexOf("_fifi")>=0){GROUPS=["_fifi"]}
+
         for (var i=0; i<GROUPS.length; i++)
         {
             if(CHATS[GROUPS[i]]==undefined) // entry wasnt present...
@@ -1178,7 +1181,7 @@ function close_emoji_div(){
 }
 
 
-window.onload = function() {
+window.onload = function(){
     
     function fade_logo()
     {
@@ -1314,11 +1317,16 @@ window.onload = function() {
 
         initSwipe(document.getElementById("main_div"), function(swipe_data){
             if(swipe_data.resultant=="right"){back();}
-        },40);        
+        },60);        
 
         initSwipe(document.getElementById("preview_div"), function(swipe_data){
             if(swipe_data.resultant=="right"){back();}
-        },40);        
+        },60);        
 
     }
+
+    document.addEventListener("backbutton", function(e){
+        e.preventDefault();
+        return false;
+    });
 };
