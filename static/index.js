@@ -1181,10 +1181,7 @@ function close_emoji_div(){
 }
 
 
-
-document.addEventListener("deviceready", onDeviceReady, false);
-
-function onDeviceReady(){
+window.onload = function(){
     document.addEventListener("backbutton", function (e) {
         e.preventDefault();
     }, false );
