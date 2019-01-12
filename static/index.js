@@ -1181,6 +1181,21 @@ function close_emoji_div(){
 }
 
 
+function onLoad() {
+        document.addEventListener("deviceready", onDeviceReady, false);
+    }
+// device APIs are available
+//
+function onDeviceReady() {
+    // Register the event listener
+    document.addEventListener("backbutton", onBackKeyDown, false);
+}
+// Handle the back button
+//
+function onBackKeyDown() {
+    console.log('Backbutton key pressed');
+}
+
 window.onload = function(){
     document.addEventListener("backbutton", function (e) {
         e.preventDefault();
