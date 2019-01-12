@@ -1180,17 +1180,7 @@ function close_emoji_div(){
     document.getElementById("emoji_div").style.display = "block";
 }
 
-document.addEventListener("backbutton", onBackKeyDown, false);  
-function onBackKeyDown(e) { 
-   e.preventDefault(); 
-    back();
-}
-
 window.onload = function(){
-    document.addEventListener("backbutton", function (e) {
-        e.preventDefault();
-    }, false );
-    
     function fade_logo()
     {
         document.getElementById("logo").style.opacity = "0.2";
@@ -1325,11 +1315,11 @@ window.onload = function(){
 
         initSwipe(document.getElementById("main_div"), function(swipe_data){
             if(swipe_data.resultant=="right"){back();}
-        },60);        
+        },100);        
 
         initSwipe(document.getElementById("preview_div"), function(swipe_data){
             if(swipe_data.resultant=="right"){back();}
-        },60);        
+        },100);        
 
     }
 
