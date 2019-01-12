@@ -1180,20 +1180,10 @@ function close_emoji_div(){
     document.getElementById("emoji_div").style.display = "block";
 }
 
-
-function onLoad() {
-        document.addEventListener("deviceready", onDeviceReady, false);
-    }
-// device APIs are available
-//
-function onDeviceReady() {
-    // Register the event listener
-    document.addEventListener("backbutton", onBackKeyDown, false);
-}
-// Handle the back button
-//
-function onBackKeyDown() {
-    console.log('Backbutton key pressed');
+document.addEventListener("backbutton", onBackKeyDown, false);  
+function onBackKeyDown(e) { 
+   e.preventDefault(); 
+   alert('Back Button is Pressed!'); 
 }
 
 window.onload = function(){
