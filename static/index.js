@@ -191,9 +191,6 @@ function attempted_login()
         var chat_div, date_div;
 
         GROUPS = reply.groups.sort();
-
-        if(GROUPS.indexOf("_fifi")>=0){GROUPS=["_fifi"]}
-
         for (var i=0; i<GROUPS.length; i++)
         {
             if(CHATS[GROUPS[i]]==undefined) // entry wasnt present...
