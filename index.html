@@ -25,6 +25,12 @@
         <script src="static/sweetalert/sweetalert.min.js"></script>
         <link rel="stylesheet" href="static/sweetalert/sweetalert.css">
 
+        <script src="static/localforage.nopromises.min.js">
+            // this script is best to use on phonegap when cordova-sqlite-storage is included in config.xml file
+            // as it enables the lib actually store data persistently in an sqlite db!
+            // available functions are: getItem,setItem,removeItem,clear
+        </script>
+
         <link id="theme" rel="stylesheet" href="">
 
         <script>
@@ -128,7 +134,7 @@
                 <p>.</p>
                 <p>.</p>
                 
-                <img id="logo" class="img-circle img-responsive center-block" 
+                <img id="logo" class="img-circle img-responsive center-block"
                     src="static/icons/hearts.png" width="100" height="100">
                             
                 <p>.</p>
@@ -254,6 +260,27 @@
                     "
                     onclick="close_emoji_div()">x</span>
             </div>
+        </div>
+        
+        <div id="quoted" style="display:none;">
+            <span id="quoted_msg" style="">hello, darness my od frnd...</span>
+
+            <span class="clickable" style="
+                color:white;
+                font-weight:bold;
+                font-size:1em;
+                background-color:#f00;
+                border-radius:50%;
+                width:20px;
+                text-indent:6px;
+
+                position:absolute;
+                right:5px;
+                top:2px;
+                z-index:2;
+                "
+                onclick="close_quote()">x</span>
+
         </div>
         
         <div class="rotate" id="loading_div"
