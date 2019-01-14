@@ -347,7 +347,6 @@ p{color:#1f1212;}
 
     background-color:#200;
     border-top:2px solid white;
-    border-bottom:2px solid white;
 
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -368,3 +367,28 @@ p{color:#1f1212;}
 }
 
 .clickable:hover{cursor:pointer;}
+
+#quoted{
+    position:absolute;
+    width:98%;
+    height:80px;
+    left:1%;
+    
+    bottom:40px;
+
+    border:1px solid white;
+    background-color:#35a;
+
+    color:#204;
+
+    text-indent:5px;
+
+    overflow:auto;
+}
+
+.quoted{
+    font-style:italic;
+    font-weight:bold;
+    display:block;
+    border-bottom:1px solid white;
+}
