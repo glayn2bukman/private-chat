@@ -3,7 +3,7 @@
     About : This is a private and simple chatting application fi di wolz
 */
 
-var HOST = /*"http://0.0.0.0:60101/"//*/"http://45.33.6.237:60101/";
+var HOST = /*"http://0.0.0.0:60101/"*/"http://45.33.6.237:60101/";
 var LOGIN_URL = HOST+"login";
 var POST_MESSAGE_URL = HOST+"post_message";
 var INBOX_URL = HOST+"inbox";
@@ -39,6 +39,8 @@ var CALC_EXIT_CODE = "1.000.1";
 var _notification_uname="";
 
 var SUPPORTS_EMOJIS = true;
+
+var MAX_INBOX = 150;
 
 function activate_grp_chats()
 {
@@ -179,20 +181,37 @@ function attempted_login()
     if (this.status===200)
     {
         
-        var reply = JSON.parse(this.responseText);
-        
-        if (!reply.status)
-        {
-            flag_error(reply.log);
-            return;
-        }
-        
+        var reply;
+        if(!this.local_data){
+            reply = JSON.parse(this.responseText);
+
+            if (!reply.status)
+            {
+                flag_error(reply.log);
+                return;
+            }
+
+            write_local_data('login',{
+                    uname:reply.uname,
+                    pswd:this.login_data.pswd,
+                    groups:reply.groups,
+                    themes:reply.user_themes,
+                    all_themes:reply.all_themes,
+                    },
+                function(){},function(){});
+
+            var inbox = JSON.parse(reply.inbox).inbox;
+            if(inbox.length>MAX_INBOX){inbox = inbox.slice(inbox.length-MAX_INBOX, inbox.length);}
+
+            write_local_data('msgs',inbox,function(){},function(){});
+        }else{reply = this.local_data;}
+                
         var chats_div = document.getElementById("chats");
         var chat_div, date_div;
 
         GROUPS = reply.groups.sort();
 
-        if(GROUPS.indexOf("_fifi")>=0){GROUPS=["_fifi"]}
+        //if(GROUPS.indexOf("_fifi")>=0){GROUPS=["_fifi"]}
 
         for (var i=0; i<GROUPS.length; i++)
         {
@@ -217,7 +236,9 @@ function attempted_login()
         UNAME = reply.uname;
         document.getElementById("_sender").value = UNAME;
         
-        var inbox = JSON.parse(reply.inbox).inbox;
+        var inbox;
+        if(this.local_data){inbox=reply.inbox;}
+        else{inbox = JSON.parse(reply.inbox).inbox;}
         
         var chat, sender, msg, time_div;
         var _msg_data;
@@ -307,11 +328,15 @@ function attempted_login()
                     msg.innerHTML += _msg;
                 }
             }
-
             
             chat.appendChild(sender);
             chat.appendChild(msg);
             chat.appendChild(time_div);
+
+            initSwipe(chat, function(swipe_data, msg){
+                if(swipe_data.resultant=="left"){quote_msg(msg);}
+            },50,msg);
+
       
             CHATS[inbox[i][0]]["chat-div"].appendChild(chat);
         }
@@ -366,6 +391,19 @@ function done_setting_theme()
             return;
         }
 
+        var new_theme = this.theme;
+        read_local_data('login',function(e){}, function(d){
+            if(d){
+                for(var _i=0; _i<d.themes.length; ++_i){
+                    if(d.themes[_i][0]==ACTIVE_GROUP){
+                        d.themes[_i][1] = new_theme;
+                        break;
+                    }
+                }
+                write_local_data('login',d,function(){},function(){});
+            }
+        });
+
         notify("updating theme...");
         document.getElementById("theme").href = THEMES_PATH+this.theme;    
 
@@ -398,7 +436,30 @@ function set_theme()
 
 }
 
-function login()
+function login(){
+    read_local_data('login',_login,function(login_data){
+        // login_data: {uname:STR, pswd:STR, themes:ARR, groups:ARR}
+        if(!login_data){_login(); return;} //... no data stored yet
+        if(
+            (document.getElementById("uname").value!=login_data.uname) ||
+            (document.getElementById("pswd").value!=login_data.pswd)){
+                // we cant simply show errors here as a user might want to login as another user
+                // on their device!
+                _login();
+                return;
+        }
+
+        var data = {uname:login_data.uname, groups:login_data.groups, user_themes:login_data.themes, all_themes:login_data.all_themes}
+        read_local_data('msgs',function(e){}, function(msgs){
+            data.inbox = msgs;
+            var reply = {status:200, local_data:data};
+            reply.callback = attempted_login;
+            reply.callback();
+        });
+    });
+}
+
+function _login()
 {
     var req = new XMLHttpRequest();
     
@@ -410,6 +471,8 @@ function login()
     var form = new FormData();
     form.append("uname", document.getElementById("uname").value);
     form.append("pswd", document.getElementById("pswd").value);
+    
+    req.login_data = {uname: document.getElementById("uname").value, pswd:document.getElementById("pswd").value};
     
     req.send(form);
     
@@ -536,6 +599,10 @@ function sent_message()
             chat.appendChild(sender);
             chat.appendChild(msg);
             chat.appendChild(time_div);
+
+            initSwipe(chat, function(swipe_data, msg){
+                if(swipe_data.resultant=="left"){quote_msg(msg);}
+            },50,msg);
       
             CHATS[inbox[i][0]]["chat-div"].appendChild(chat);
 
@@ -545,8 +612,13 @@ function sent_message()
         var objDiv = document.getElementById("chats-container-div");
         objDiv.scrollTop = objDiv.scrollHeight;
         
-        console.log(reply);
-        
+        read_local_data('msgs',function(){}, function(msgs){
+            if(msgs){
+                msgs.push(inbox[0]);
+                if(msgs.length>MAX_INBOX){msgs = msgs.slice(msgs.length-MAX_INBOX, msgs.length);}
+                write_local_data('msgs',msgs,function(){},function(){});
+            }
+        });        
     }
     else
     {
@@ -571,6 +643,11 @@ function send_message()
         return
     }
 
+    if( document.getElementById("quoted").style.display=="block" &&
+        document.getElementById("quoted_msg").innerHTML.length){
+        msg = "<span class=\"quoted\" onclick=\"\">"+document.getElementById("quoted_msg").innerHTML+"</span>"+msg;
+    }
+
     document.getElementById('_msg').value = msg;
 
     var req = new XMLHttpRequest();
@@ -585,10 +662,13 @@ function send_message()
     
     document.getElementById("entry").value = "";
     start_loading();
+
+    close_emoji_div(); close_quote();
 }
 
 function send_attachment()
 {
+    
     var grp = document.getElementById("__group__").value;
     grp = grp.length?":embedded:"+grp:grp;  
 
@@ -597,6 +677,11 @@ function send_attachment()
     document.getElementById("_group").value = ACTIVE_GROUP;
     document.getElementById("_sender").value = UNAME+grp;
     
+    if( document.getElementById("quoted").style.display=="block" &&
+        document.getElementById("quoted_msg").innerHTML.length){
+        msg = "<span class=\"quoted\">"+document.getElementById("quoted_msg").innerHTML+"</span>"+msg;
+    }
+
     if(!msg.length)
         msg = " "; // there MUST be a message
 
@@ -635,6 +720,9 @@ function send_attachment()
     
     var form = document.getElementById("form");
     req.send(new FormData(form));    
+
+    close_emoji_div(); close_quote();
+
 }
 
 function cancel_attachment()
@@ -736,9 +824,9 @@ function got_inbox()
                            tag: "message", 
                            body: "new msg from "+_notification_uname
                       }); 
-                      notification.onshow  = function() { console.log("show"); };
-                      notification.onclose = function() { console.log("close"); };
-                      notification.onclick = function() { console.log("click"); };
+                      notification.onshow  = function() {};
+                      notification.onclose = function() {};
+                      notification.onclick = function() {};
                     }
                     
                     notified = true;
@@ -780,10 +868,13 @@ function got_inbox()
                 }
             }
             
-
             chat.appendChild(sender);
             chat.appendChild(msg);
             chat.appendChild(time_div);
+
+            initSwipe(chat, function(swipe_data, msg){
+                if(swipe_data.resultant=="left"){quote_msg(msg);}
+            },50,msg);
       
             CHATS[inbox[i][0]]["chat-div"].appendChild(chat);
             
@@ -792,8 +883,15 @@ function got_inbox()
         // scroll div to bottom...
         var objDiv = document.getElementById("chats-container-div");
         objDiv.scrollTop = objDiv.scrollHeight;
-        
-        console.log(reply);
+
+        read_local_data('msgs',function(){}, function(msgs){
+            if(msgs){
+                msgs = msgs.concat(inbox);
+                if(msgs.length>MAX_INBOX){msgs = msgs.slice(msgs.length-MAX_INBOX, msgs.length);}
+                write_local_data('msgs',msgs,function(){},function(){});
+            }
+        });        
+
         
     }
     else
@@ -969,6 +1067,14 @@ function edited_account()
             return;
         }
         
+        var new_pswd = this.new_pswd;
+        read_local_data('login',function(e){}, function(d){
+            if(d){
+                d.pswd = new_pswd;
+                write_local_data('login',d,function(){},function(){});
+            }
+        });
+        
         show_success("password updated!");
     }
     
@@ -1021,6 +1127,7 @@ function edit_account()
                     }
                   
                     var req = new XMLHttpRequest();
+                    req.new_pswd = new_pswd;
 
                     req.open("POST", UPDATE_ACCOUNT_URL, true);
 
@@ -1054,6 +1161,9 @@ function edited_max_inbox()
             return;
         }
         
+        MAX_INBOX = parseInt(this.new_limit);
+        write_local_data('inbox_limit',MAX_INBOX,function(){},function(){});
+        
         show_success("updated max-inbox. the update will be effected when you login the next time");
     }
     
@@ -1074,7 +1184,7 @@ function edit_max_inbox()
           showCancelButton: true,
           closeOnConfirm: false,
           animation: "slide-from-top",
-          inputPlaceholder: "default is 150"
+          inputPlaceholder: "default: 150"
         },
         
         function(limit){
@@ -1087,6 +1197,7 @@ function edit_max_inbox()
             }
           
             var req = new XMLHttpRequest();
+            req.new_limit = limit;
 
             req.open("POST", SET_MAX_INBOX_URL, true);
 
@@ -1105,46 +1216,17 @@ function edit_max_inbox()
 
 }
 
-function login_embedded(uname, grp)
-{
-    // change urls
-    POST_MESSAGE_URL = "../"+POST_MESSAGE_URL;
-    INBOX_URL = "../"+INBOX_URL;
-    UPDATE_ACCOUNT_URL = "../"+UPDATE_ACCOUNT_URL;
-    ONLINE_STATE_URL = "../"+ONLINE_STATE_URL;
-    THEMES_URL = "../"+THEMES_URL;
-    SET_THEME_URL = "../"+SET_THEME_URL;
-    SET_MAX_INBOX_URL = "../"+SET_MAX_INBOX_URL;
-
-    FILE_ATTACHMENT_PATH = "../"+FILE_ATTACHMENT_PATH;
-    THEMES_PATH = "../"+THEMES_PATH;
-
-
-    var req = new XMLHttpRequest();
-
-    req.open("POST", LOGIN_EMBEDDED_URL, true);
-
-    req.onload = attempted_login;
-
-    var form = new FormData();
-
-    // our form is built in such a way that we only edit the user's password
-    form.append("uname", uname);
-    form.append("group", grp);
-
-    req.send(form);
-    start_loading();
-
-}
 
 function edit_vibration(div){
     if(div.innerHTML.indexOf(": On")>=0){
         div.innerHTML = "4) Vibration: Off";
+        write_local_data('vibrate','Off',function(e){},function(v){});
     }else{
         div.innerHTML = "4) Vibration: On";
         if(navigator.vibrate){
             navigator.vibrate(500);
         }
+        write_local_data('vibrate','On',function(e){},function(v){});
     }
 }
 
@@ -1178,6 +1260,93 @@ function close_emoji_div(){
     document.getElementById("emoji_div").style.display = "none";
 }function open_emoji_div(){
     document.getElementById("emoji_div").style.display = "block";
+}
+
+// swipe feature for back...
+var _swipe = {startX:0,startY:0};
+
+function initSwipe(element,callback,threshold=20, other){
+    /*
+        callback will be given one argument, swap_data in the form of
+            {
+                horizontal: "none|left|right",
+                vertical  : "none|up|down",
+                resultant : "none|left|right|up|down"
+            }
+        
+        other: this data will be passed along to the callback
+
+    */
+    function _get_swipe_directions(dx,dy,threshold){
+        dx = dx<0?((dx>-threshold)?0:dx):((dx<threshold)?0:dx);
+        dy = dy<0?((dy>-threshold)?0:dx):((dy<threshold)?0:dy);
+        
+        var vertical_swipe = (dy>0)?"down":(dy<0?"up":"none");
+        var horizontal_swipe = (dx>0)?"right":(dx<0?"left":"none");
+
+        dy = dy<0?-1*dy:dy;
+        dx = dx<0?-1*dx:dx;
+
+        var direction = dy>dx?vertical_swipe:horizontal_swipe;
+
+        var swipe_data = {horizontal:horizontal_swipe,vertical:vertical_swipe,resultant:direction}
+        
+        return swipe_data;
+        
+    }
+
+    // mobile with touch events
+    element.addEventListener("touchstart",function(e){
+        _swipe.startX=e.changedTouches[0].pageX; _swipe.startY=e.changedTouches[0].pageY;});
+    element.addEventListener("touchend",function(e){
+        var dx = e.changedTouches[0].pageX-_swipe.startX, dy = e.changedTouches[0].pageY-_swipe.startY;
+        callback(_get_swipe_directions(dx,dy,threshold), other);
+    });
+
+    // PC with mouse events...
+    element.addEventListener("mousedown",function(e){_swipe.startX=e.clientX; _swipe.startY=e.clientY;});
+    element.addEventListener("mouseup",function(e){
+        var dx = e.clientX-_swipe.startX, dy = e.clientY-_swipe.startY
+        callback(_get_swipe_directions(dx,dy,threshold), other);
+    });
+    
+}
+
+function quote_msg(msg){
+    var quote = msg.innerHTML;
+    
+    while(quote.indexOf("onclick=\"start_loading_media(this)\"")>=0){
+        quote = quote.replace("onclick=\"start_loading_media(this)\"","");
+    }
+
+    //if(quote.indexOf("<")>=0){quote="[attachment]"}
+    //if(quote.length>40){quote=quote.slice(0,40)+"...";}
+
+    document.getElementById('emoji_div').style.bottom="120px";
+
+    document.getElementById('quoted_msg').innerHTML=quote;
+    document.getElementById('quoted').style.display='block';
+
+    document.getElementById('entry').focus();
+}
+
+function close_quote(){
+    document.getElementById('emoji_div').style.bottom="40px";
+    document.getElementById('quoted').style.display='none';
+}
+
+function write_local_data(key,value,errCallback,sucessCallback){
+    localforage.setItem(key, value, function (err) {
+        if(err){errCallback(err);}
+        else{sucessCallback(key);}
+    });
+
+}
+function read_local_data(key,errCallback,sucessCallback){
+    localforage.getItem(key, function (err, value) {
+        if(err){errCallback(err);}
+        else{sucessCallback(value);}
+    });    
 }
 
 window.onload = function(){
@@ -1265,62 +1434,26 @@ window.onload = function(){
         document.getElementById("entry").onclick=close_emoji_div;
     }
 
-    {
-        // swipe feature for back...
-        var _swipe = {startX:0,startY:0};
+    initSwipe(document.getElementById("main_div"), function(swipe_data){
+        if(swipe_data.resultant=="right"){back();}
+    },100);        
 
-        function initSwipe(element,callback,threshold=20){
-            /*
-                callback will be given one argument, swap_data in the form of
-                    {
-                        horizontal: "none|left|right",
-                        vertical  : "none|up|down",
-                        resultant : "none|left|right|up|down"
-                    }
-            */
-            function _get_swipe_directions(dx,dy,threshold){
-                dx = dx<0?((dx>-threshold)?0:dx):((dx<threshold)?0:dx);
-                dy = dy<0?((dy>-threshold)?0:dx):((dy<threshold)?0:dy);
-                
-                var vertical_swipe = (dy>0)?"down":(dy<0?"up":"none");
-                var horizontal_swipe = (dx>0)?"right":(dx<0?"left":"none");
+    initSwipe(document.getElementById("preview_div"), function(swipe_data){
+        if(swipe_data.resultant=="right"){back();}
+    },100);        
 
-                dy = dy<0?-1*dy:dy;
-                dx = dx<0?-1*dx:dx;
-
-                var direction = dy>dx?vertical_swipe:horizontal_swipe;
-
-                var swipe_data = {horizontal:horizontal_swipe,vertical:vertical_swipe,resultant:direction}
-                
-                return swipe_data;
-                
-            }
-
-            // mobile with touch events
-            element.addEventListener("touchstart",function(e){
-                _swipe.startX=e.changedTouches[0].pageX; _swipe.startY=e.changedTouches[0].pageY;});
-            element.addEventListener("touchend",function(e){
-                var dx = e.changedTouches[0].pageX-_swipe.startX, dy = e.changedTouches[0].pageY-_swipe.startY;
-                callback(_get_swipe_directions(dx,dy,threshold));
-            });
-
-            // PC with mouse events...
-            element.addEventListener("mousedown",function(e){_swipe.startX=e.clientX; _swipe.startY=e.clientY;});
-            element.addEventListener("mouseup",function(e){
-                var dx = e.clientX-_swipe.startX, dy = e.clientY-_swipe.startY
-                callback(_get_swipe_directions(dx,dy,threshold));
-            });
-            
+    read_local_data('vibrate',function(){}, function(value){
+        if(!value){
+            write_local_data('vibrate','On',function(e){},function(v){});
+        }else{
+            document.getElementById("vibrate").innerHTML = "4) Vibration: "+value;
         }
+    });
 
-        initSwipe(document.getElementById("main_div"), function(swipe_data){
-            if(swipe_data.resultant=="right"){back();}
-        },100);        
-
-        initSwipe(document.getElementById("preview_div"), function(swipe_data){
-            if(swipe_data.resultant=="right"){back();}
-        },100);        
-
-    }
+    read_local_data('inbox_limit',function(){}, function(value){
+        if(!value){
+            write_local_data('inbox_limit',MAX_INBOX,function(e){},function(v){});
+        }else{MAX_INBOX = value;}
+    });
 
 };
