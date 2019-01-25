@@ -886,7 +886,18 @@ function got_inbox()
 
         read_local_data('msgs',function(){}, function(msgs){
             if(msgs){
-                msgs = msgs.concat(inbox);
+                var real_inbox = []
+                if(msgs.length){
+                    var l = msgs.length-1;
+                    for(var ic=0; ic<inbox.length; ++ic){
+                        if(inbox[ic][2]>msgs[l][2]){real_inbox.push(inbox[ic]);}
+                    }                    
+                }else{real_inbox = inbox;}
+                
+                console.log(inbox);
+                console.log("....");
+                console.log(real_inbox);
+                msgs = msgs.concat(real_inbox);
                 if(msgs.length>MAX_INBOX){msgs = msgs.slice(msgs.length-MAX_INBOX, msgs.length);}
                 write_local_data('msgs',msgs,function(){},function(){});
             }
@@ -922,6 +933,8 @@ function get_inbox()
 
 function back()
 {
+    close_emoji_div(); close_quote();
+
     if (document.getElementById("preview_div").style.display == "block")
     {
         done_previewing();
@@ -931,11 +944,16 @@ function back()
     if (__EMBEDDED__)
         return;
     
+    document.getElementById("theme").href = "static/index.css";    
+
     if(GROUPS.length==1 && ACTIVE_GROUP.length)
         ACTIVE_GROUP = "";
 
     if (!ACTIVE_GROUP) // logout...
     {
+        clear(document.getElementById("groups-div"));
+        clear(document.getElementById("chats-container-div"));
+
         if(document.getElementById("login-div").style.display == "block"){
             document.getElementById("calc_div").style.display = "block";
             document.getElementById("main_div").style.display = "none";
@@ -1420,7 +1438,20 @@ window.onload = function(){
         }
         var emoji_div = document.getElementById("emoji_div");
         var img;
-        var em_limit = 88;
+
+            // first load the smiley faces emojis
+        var em_limit = 118;
+        for(var i=89; i<=em_limit; ++i){
+            img = document.createElement("img");
+            img.src = EMOJI_PATH+i+".png";
+            img.setAttribute("class","emoji clickable");
+            img.onclick = emoji_clicked;
+            
+            emoji_div.appendChild(img);
+        }
+
+        // now load the erotic emojis
+        em_limit = 88;
         for(var i=1; i<=em_limit; ++i){
 
             img = document.createElement("img");
