@@ -37,6 +37,17 @@ body, html, bg{height: 100%;}
     z-index:100;
 }
 
+#back{
+    position: fixed;
+    left:2px;
+    top:2px;
+    
+    font-size: 2em;
+    color: orange;
+    
+    z-index:100;
+}
+
 #online_state{
     position: fixed;
     height: 10px;
