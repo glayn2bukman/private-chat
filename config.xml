@@ -32,10 +32,11 @@
     <icon src="data/calc.png" gap:role="default" />
 
     <plugin name="cordova-plugin-whitelist" />
-    <plugin name="cordova-plugin-vibration" />
-    
+
+    <!--
+    <plugin name="cordova-plugin-vibration" />    
     <plugin name="cordova-plugin-sqlite" />
-    
+    -->
 
 </widget>
 
