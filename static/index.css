@@ -1,8 +1,13 @@
 body{
     background:#1f1212;
+
+    background-position: center;
+    background-size: cover;
+
 }
 
 body, html, bg{height: 100%;}
+
 
 #preview_div{
     display: none;
@@ -341,6 +346,7 @@ p{color:#1f1212;}
     position:fixed;
     width:100%;
     height:40%;
+    height:250px;
     bottom:40px;
 
     overflow:auto;
@@ -378,6 +384,8 @@ p{color:#1f1212;}
 
     border:1px solid white;
     background-color:#35a;
+
+    border-radius: 10px 10px 0px 0px;
 
     color:#204;
 

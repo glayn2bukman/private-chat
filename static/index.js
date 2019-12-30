@@ -3,13 +3,15 @@
     About : This is a private and simple chatting application fi di wolz
 */
 
-var HOST = /*"http://0.0.0.0:60101/"*/"http://45.33.6.237:60101/";
+var HOST = "http://45.33.6.237:60101/";
+    //HOST = "http://0.0.0.0:60101/";
+
 var LOGIN_URL = HOST+"login";
 var POST_MESSAGE_URL = HOST+"post_message";
 var INBOX_URL = HOST+"inbox";
 var UPDATE_ACCOUNT_URL = HOST+"update_account";
 var ONLINE_STATE_URL = HOST+"activity_status";
-var THEMES_URL = HOST+"themes";
+var THEMES_URL = "static/themes";  //HOST+"themes";
 var SET_THEME_URL = HOST+"set_user_theme";
 var SET_MAX_INBOX_URL = HOST+"set_max_inbox";
 var LOGIN_EMBEDDED_URL = HOST+"../login_embedded";
@@ -41,6 +43,25 @@ var _notification_uname="";
 var SUPPORTS_EMOJIS = true;
 
 var MAX_INBOX = 150;
+
+var TARGET_LOGIN_BG = ''; // "../data/"+  "st.jpg";
+
+var sure_modal_action = null;
+
+var LOCAL_STORAGE_PREFIX = '_jpr_';
+
+var MSG_EDITING = [
+    ["^i",  "<i>"],                        ["^/i","</i>"],
+    ["^b",  "<b>"],                        ["^/b","</b>"],
+    ["^u",  "<u>"],                        ["^/u","</u>"],
+    ["^l",  "<a href=\""],                 ["^/l","\">here</u>"],
+
+    // slightly more complicated...
+    ["^s",  "<span style=\"font-size:"],   ["^/s","</span>"],
+    ["^c",  "<span style=\"color:"],       ["^/c","</span>"],
+    
+    ["^.",  ";\">"],
+];
 
 function activate_grp_chats()
 {
@@ -190,6 +211,8 @@ function attempted_login()
                 flag_error(reply.log);
                 return;
             }
+
+            //document.body.style.background = "#1f1212";
 
             write_local_data('login',{
                     uname:reply.uname,
@@ -405,7 +428,7 @@ function done_setting_theme()
         });
 
         notify("updating theme...");
-        document.getElementById("theme").href = THEMES_PATH+this.theme;    
+        document.getElementById("theme").href = THEMES_PATH+this.theme;
 
     }
     else
@@ -439,6 +462,7 @@ function set_theme()
 function login(){
     read_local_data('login',_login,function(login_data){
         // login_data: {uname:STR, pswd:STR, themes:ARR, groups:ARR}
+
         if(!login_data){_login(); return;} //... no data stored yet
         if(
             (document.getElementById("uname").value!=login_data.uname) ||
@@ -648,6 +672,11 @@ function send_message()
         msg = "<span class=\"quoted\" onclick=\"\">"+document.getElementById("quoted_msg").innerHTML+"</span>"+msg;
     }
 
+    // edit msgs for special inline visual changes...
+    for(var mi=0; mi<MSG_EDITING.length; ++mi){
+        while(msg.indexOf(MSG_EDITING[mi][0])>=0){msg = msg.replace(MSG_EDITING[mi][0],MSG_EDITING[mi][1]);}
+    }
+
     document.getElementById('_msg').value = msg;
 
     var req = new XMLHttpRequest();
@@ -684,6 +713,11 @@ function send_attachment()
 
     if(!msg.length)
         msg = " "; // there MUST be a message
+
+    // edit msgs for special inline visual changes...
+    for(var mi=0; mi<MSG_EDITING.length; ++mi){
+        while(msg.indexOf(MSG_EDITING[mi][0])>=0){msg = msg.replace(MSG_EDITING[mi][0],MSG_EDITING[mi][1]);}
+    }
 
     document.getElementById('_msg').value = msg;
 
@@ -893,10 +927,11 @@ function got_inbox()
                         if(inbox[ic][2]>msgs[l][2]){real_inbox.push(inbox[ic]);}
                     }                    
                 }else{real_inbox = inbox;}
-                
+                /*
                 console.log(inbox);
                 console.log("....");
                 console.log(real_inbox);
+                */
                 msgs = msgs.concat(real_inbox);
                 if(msgs.length>MAX_INBOX){msgs = msgs.slice(msgs.length-MAX_INBOX, msgs.length);}
                 write_local_data('msgs',msgs,function(){},function(){});
@@ -931,6 +966,41 @@ function get_inbox()
     
 }
 
+function _logout(){
+    clear(document.getElementById("groups-div"));
+    clear(document.getElementById("chats-container-div"));
+
+    if(document.getElementById("login-div").style.display == "block"){
+        document.getElementById("calc_div").style.display = "block";
+        document.getElementById("main_div").style.display = "none";
+    }else{
+        document.getElementById("uname").value="";
+        document.getElementById("pswd").value="";
+        
+        GROUPS=[];
+        ACTIVE_GROUP = "";
+        UNAME = "";
+        CHATS = {}
+        
+        clearInterval(INBOX_READ_INTERVAL_VAR);
+        
+        document.getElementById("groups-div").style.display = "none";
+        document.getElementById("chats").style.display = "none";
+        document.getElementById("login-div").style.display = "block";
+    }
+
+    hide_modal("sure_modal");
+}
+
+function _to_grps(){
+    ACTIVE_GROUP = "";
+
+    document.getElementById("chats").style.display = "none";    
+    document.getElementById("groups-div").style.display = "block";
+
+    hide_modal("sure_modal");
+}
+
 function back()
 {
     close_emoji_div(); close_quote();
@@ -951,35 +1021,17 @@ function back()
 
     if (!ACTIVE_GROUP) // logout...
     {
-        clear(document.getElementById("groups-div"));
-        clear(document.getElementById("chats-container-div"));
-
-        if(document.getElementById("login-div").style.display == "block"){
-            document.getElementById("calc_div").style.display = "block";
-            document.getElementById("main_div").style.display = "none";
-        }else{
-            document.getElementById("uname").value="";
-            document.getElementById("pswd").value="";
-            
-            GROUPS=[];
-            ACTIVE_GROUP = "";
-            UNAME = "";
-            CHATS = {}
-            
-            clearInterval(INBOX_READ_INTERVAL_VAR);
-            
-            document.getElementById("groups-div").style.display = "none";
-            document.getElementById("chats").style.display = "none";
-            document.getElementById("login-div").style.display = "block";
-        }
+        document.getElementById("sure_modal_title").innerHTML = "Leaving window";
+        show_modal("sure_modal");
+        sure_modal_action = _logout
     }
 
     else // return to groups...
     {
-        ACTIVE_GROUP = "";
 
-        document.getElementById("chats").style.display = "none";    
-        document.getElementById("groups-div").style.display = "block";
+        document.getElementById("sure_modal_title").innerHTML = "Leaving window";
+        show_modal("sure_modal");
+        sure_modal_action = _to_grps;
     }
 
     check_online_status();
@@ -1260,6 +1312,8 @@ function calc_input(){
             document.getElementById("calc_output").innerHTML = "";
             document.getElementById("calc_div").style.display = "none";
             document.getElementById("main_div").style.display = "block";
+            
+            //document.body.style.background = '#1f1212 url("'+TARGET_LOGIN_BG+'") no-repeat';            
         }else{
             var res = eval(cin.innerHTML.replace("x","*"));
             if(isNaN(res)){
@@ -1315,15 +1369,20 @@ function initSwipe(element,callback,threshold=20, other){
 
     // mobile with touch events
     element.addEventListener("touchstart",function(e){
+        e.stopPropagation();
         _swipe.startX=e.changedTouches[0].pageX; _swipe.startY=e.changedTouches[0].pageY;});
     element.addEventListener("touchend",function(e){
+        e.stopPropagation();
         var dx = e.changedTouches[0].pageX-_swipe.startX, dy = e.changedTouches[0].pageY-_swipe.startY;
         callback(_get_swipe_directions(dx,dy,threshold), other);
     });
 
     // PC with mouse events...
-    element.addEventListener("mousedown",function(e){_swipe.startX=e.clientX; _swipe.startY=e.clientY;});
+    element.addEventListener("mousedown",function(e){
+        e.stopPropagation();
+        _swipe.startX=e.clientX; _swipe.startY=e.clientY;});
     element.addEventListener("mouseup",function(e){
+        e.stopPropagation();
         var dx = e.clientX-_swipe.startX, dy = e.clientY-_swipe.startY
         callback(_get_swipe_directions(dx,dy,threshold), other);
     });
@@ -1354,20 +1413,20 @@ function close_quote(){
 }
 
 function write_local_data(key,value,errCallback,sucessCallback){
-    localforage.setItem(key, value, function (err) {
+    localforage.setItem(LOCAL_STORAGE_PREFIX+key, value, function (err) {
         if(err){errCallback(err);}
         else{sucessCallback(key);}
     });
 
 }
 function read_local_data(key,errCallback,sucessCallback){
-    localforage.getItem(key, function (err, value) {
+    localforage.getItem(LOCAL_STORAGE_PREFIX+key, function (err, value) {
         if(err){errCallback(err);}
         else{sucessCallback(value);}
     });    
 }
 
-window.onload = function(){
+function init(){
     function fade_logo()
     {
         document.getElementById("logo").style.opacity = "0.2";
@@ -1465,14 +1524,6 @@ window.onload = function(){
         document.getElementById("entry").onclick=close_emoji_div;
     }
 
-    initSwipe(document.getElementById("main_div"), function(swipe_data){
-        if(swipe_data.resultant=="right"){back();}
-    },100);        
-
-    initSwipe(document.getElementById("preview_div"), function(swipe_data){
-        if(swipe_data.resultant=="right"){back();}
-    },100);        
-
     read_local_data('vibrate',function(){}, function(value){
         if(!value){
             write_local_data('vibrate','On',function(e){},function(v){});
@@ -1487,4 +1538,19 @@ window.onload = function(){
         }else{MAX_INBOX = value;}
     });
 
-};
+    document.addEventListener("backbutton", function(e){
+        e.stopPropagation();
+        back();
+    }, false);
+}
+
+window.onload = function(){
+    if(!("deviceready" in window)){init();}
+    else{
+        document.addEventListener("deviceready", function(){
+            init();
+        }, false);
+    }
+}
+
+
