@@ -119,17 +119,44 @@
                     <div id="vibrate" class="setting" onclick="edit_vibration(this)">4) Vibration: On</div>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-success" data-dismiss="modal">Back</button>
+                <button type="button" class="btn btn-success" data-dismiss="modal">Done</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal fade" id="sure_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+          <div class="modal-dialog" style="width:90%;" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="sure_modal_title">Logout</h4>
+              </div>
+              <div class="modal-body" style="overflow: auto; max-height: 250px;">
+                    are you sure?
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">No</button>
+                <button type="button" class="btn btn-success" onclick="sure_modal_action()">Yes</button>
               </div>
             </div>
           </div>
         </div>
         
         <div id="main_div" style="display:none">
-            <div id="logout" onclick="back()"></div>
+            <div id="logout" onclick="back()" style="display:none;"></div>
             <div id="online_state" class="blink" style="display:none"></div>
 
-            <div id="login-div" class="container" style="display:block;">
+            <div id="login-div" class="container" style="
+                display:block;
+                position:absolute;
+                width:100%; left:0%;
+                height:100%;top:0%;
+                
+                background: #1f1212 url('data/target.jpg') no-repeat;
+                background-position: center;
+                background-size: cover;
+            ">
                 
                 <p>.</p>
                 <p>.</p>
@@ -197,7 +224,7 @@
                         <i class="glyphicon glyphicon-paperclip"
                             onclick="open_emoji_div()"></i>
                     </span>
-                    <input id="entry" type="text" class="form-control" placeholder="type here...">
+                    <input oncontextmenu="return true;" id="entry" type="text" class="form-control" placeholder="type here...">
                     <span class="input-group-addon">
                         <i class="glyphicon glyphicon-chevron-right"
                             onclick="send_message()"></i>
@@ -206,7 +233,7 @@
             </div>
         </div>
         
-        <div id="calc_div">
+        <div id="calc_div" style='display:none2;'>
             <div id="calc_input"></div>
             <div id="calc_output"></div>
             <div id="calc_btn_div">
@@ -244,7 +271,32 @@
         </div>
 
         <div id="emoji_div" style="display:none;">
-            <div>
+            <span style="
+                position:fixed;
+                bottom:295px;
+                left:1%;
+                border-radius: 10px;
+                padding:5px;
+                background-color: white;
+                color:green;
+                z-index: -10;
+                text-align:center;
+            " onclick="document.getElementById('files').click()">attach media</span>
+
+            <span style="
+                position:fixed;
+                bottom:295px;
+                right:1%;
+                border-radius: 10px;
+                padding:5px;
+                background-color: white;
+                color:red;
+                z-index: -10;
+                text-align:center;
+            " onclick="close_emoji_div()">close</span>
+
+            <div style="background-color:#200">
+<!--
                 <span class="clickable" style="color:#ddd;font-weight:bold;margin-left:5px;"
                     onclick="document.getElementById('files').click()">Attach File...</span>
                 <span class="clickable" style="
@@ -259,27 +311,24 @@
                     text-align:center;
                     "
                     onclick="close_emoji_div()">x</span>
+-->
             </div>
         </div>
         
         <div id="quoted" style="display:none;">
+            <div style="
+                position:fixed;
+                bottom:125px;
+                right:1%;
+                border-radius: 10px;
+                padding:5px;
+                background-color: white;
+                color:red;
+                z-index: 2;
+                text-align:center;
+            " onclick="close_quote()">close</div>
+
             <span id="quoted_msg" style="">hello, darness my od frnd...</span>
-
-            <span class="clickable" style="
-                color:white;
-                font-weight:bold;
-                font-size:1em;
-                background-color:#f00;
-                border-radius:50%;
-                width:20px;
-                text-indent:6px;
-
-                position:absolute;
-                right:5px;
-                top:2px;
-                z-index:2;
-                "
-                onclick="close_quote()">x</span>
 
         </div>
         
@@ -298,6 +347,5 @@
 
         <input type="hidden" id="__uname__">
         <input type="hidden" id="__group__">
-        
     </body>
 </html>
