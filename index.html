@@ -47,17 +47,39 @@
     </head>
 
     <body oncontextmenu="return false;">
-        <div id="preview_div" style="display:none">
+        <div id="preview_div" style="display:none; overflow:auto; text-align:center;">
             <div class="clickable" style="
-                color:#0f0; 
-                background-color:black; 
-                font-weight:bold; 
-                text-align:center;
-                width:100%;
-                float:right;"
+                position: fixed;
+                right: 1%;
+                padding: 5px;
+                color: red;
+                background-color: #fff;
+                border: 1px solid red;
+                top:1%;
+                z-index: 1;
+                border-radius:5px;
+                text-align: center;
+
+                "
                 
-                onclick="done_previewing()">done</div>
-            <img id="preview-img" class="img-responsive" style="margin:0 auto;"/>
+                onclick="done_previewing()">done
+            </div>
+            
+            <div style="
+                    font-size:1.8em;
+                    margin-left: 10px;
+                    border-radius: 5px;
+                    background-color: #1f1212;
+                    border:1px solid black;
+                    position:fixed;
+                    top:45%;
+                    color:blue;
+                ">
+                <span class="glyphicon glyphicon-plus-sign" style="margin:2px;" onclick="zoom('in');"></span><br>
+                <span class="glyphicon glyphicon-minus-sign" style="margin:2px;"  onclick="zoom('out')"></span>
+            </div>
+            
+            <img id="preview-img" class="img-responsive2" style="margin:0 auto;"/>
         </div>
                 
         <div id="uploading" style="display:none">Uploading Files: <span id="upload_progress">0.00%</span></div>
