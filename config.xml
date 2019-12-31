@@ -9,6 +9,9 @@
     <!--<preference name="phonegap-version" value="cli-6.3.0" />-->
     <preference name="DisallowOverscroll" value="true" />
     <preference name="android-minSdkVersion" value="14"/>
+    
+    <!-- lock to portait -->
+    <preference name="orientation" value="portrait" />
 
     <feature name="App">
         <param name="android-package" value="org.apache.cordova.App" />
@@ -32,11 +35,9 @@
     <icon src="data/calc.png" gap:role="default" />
 
     <plugin name="cordova-plugin-whitelist" />
-
     
-    <plugin name="cordova-plugin-vibration" />    
+    <plugin name="cordova-plugin-vibration" />
     <plugin name="cordova-plugin-sqlite" />
-    
 
 </widget>
 
