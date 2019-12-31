@@ -63,6 +63,8 @@ var MSG_EDITING = [
     ["^.",  ";\">"],
 ];
 
+var CLICK_TIMER = null;
+
 function activate_grp_chats()
 {
     for (var i=0; i<GROUPS.length; i++)
@@ -966,7 +968,7 @@ function get_inbox()
     
 }
 
-function _logout(){
+function _to_calc(){
     clear(document.getElementById("groups-div"));
     clear(document.getElementById("chats-container-div"));
 
@@ -1003,6 +1005,15 @@ function _to_grps(){
 
 function back()
 {
+    if(
+        ("block"==document.getElementById("calc_div").style.display)||
+        (""==document.getElementById("calc_div").style.display)
+    ){
+        return; // in calc mode, no need for this
+    }
+
+    console.log(document.getElementById("calc_div").style.display);
+
     close_emoji_div(); close_quote();
 
     if (document.getElementById("preview_div").style.display == "block")
@@ -1019,19 +1030,28 @@ function back()
     if(GROUPS.length==1 && ACTIVE_GROUP.length)
         ACTIVE_GROUP = "";
 
-    if (!ACTIVE_GROUP) // logout...
+    if ("none"==document.getElementById("chats").style.display) // logout...
     {
-        document.getElementById("sure_modal_title").innerHTML = "Leaving window";
+        if("block"==document.getElementById("login-div").style.display){
+            document.getElementById("sure_modal_title").innerHTML = "Leave App";
+        }else{
+            document.getElementById("sure_modal_title").innerHTML = "Logout";
+        }
         show_modal("sure_modal");
-        sure_modal_action = _logout
+        sure_modal_action = _to_calc
     }
 
     else // return to groups...
-    {
-
-        document.getElementById("sure_modal_title").innerHTML = "Leaving window";
-        show_modal("sure_modal");
-        sure_modal_action = _to_grps;
+    {        
+        if(ACTIVE_GROUP){
+            document.getElementById("sure_modal_title").innerHTML = "Leave Chat";
+            show_modal("sure_modal");
+            sure_modal_action = _to_grps;
+        }else{
+            document.getElementById("sure_modal_title").innerHTML = "Logout";
+            show_modal("sure_modal");
+            sure_modal_action = _to_calc;
+        }
     }
 
     check_online_status();
@@ -1065,17 +1085,75 @@ function img_loaded()
     this.mom.onclick = preview_img;
 }
 
+function preview_img_loaded(){
+    let img = document.getElementById("preview-img");
+    let iw = img.width, ih = img.height;
+
+    img._original_width = iw;
+    img._original_height = ih;
+
+    let mom = document.getElementById("preview_div")
+    let mom_ch = mom.clientHeight, mom_cw = mom.clientWidth;
+
+    // ensure image is always centered vertically
+    if(img.height < mom_ch){
+        img.style.marginTop = parseInt((mom_ch-img.height)/2) + "px";
+    }else{
+        img.style.marginTop = 0 + "px";
+    }
+}
 function preview_img()
 {
     document.getElementById("main_div").style.opacity = "0.1";
     document.getElementById("preview-img").src = this.bgImg.src;
-    document.getElementById("preview_div").style.display = "block";
+    document.getElementById("preview_div").style.display = "block";    
 }
 
 function done_previewing()
 {
     document.getElementById("main_div").style.opacity = "1"
     document.getElementById("preview_div").style.display = "none";
+}
+
+function zoom(direction, scale=0){
+    let img = document.getElementById("preview-img");
+
+    if(
+        ('out'==direction) && (img.width<=(img._original_width/2))||
+        ('in'==direction) && (img.width>=(img._original_width*2))
+    ){
+        
+        return
+    }
+
+    let iw = img.width, ih = img.height;
+    if('in'==direction){
+        img.style.width = (img.width*(scale?scale:1.1))+"px";
+        img.style.height = (img.height*(scale?scale:1.1))+"px";
+    }else{
+        img.style.width = (img.width*(scale?scale:0.9))+"px";
+        img.style.height = (img.height*(scale?scale:0.9))+"px";
+    }
+
+    let mom = document.getElementById("preview_div")
+    let mom_ch = mom.clientHeight, mom_cw = mom.clientWidth;
+
+    // ensure image is always centered vertically
+    if(img.height < mom_ch){
+        img.style.marginTop = parseInt((mom_ch-img.height)/2) + "px";
+    }else{
+        img.style.marginTop = 0 + "px";
+    }
+
+    // ensure zoom occurs at the center point
+
+    mom.scrollTop = ((img.height>mom_ch) ? parseInt((mom.scrollTop/(mom_ch+(ih-mom_ch)))*(mom_ch+(img.height-mom_ch))) : 0);
+    mom.scrollLeft = ((img.width>mom_cw) ? parseInt((mom.scrollLeft/(mom_cw+(iw-mom_cw)))*(mom_cw+(img.width-mom_cw))) : 0);
+/*
+    console.log(img.width, img.height);
+    console.log(mom.scrollLeft, mom.offsetWidth, mom.scrollTop, mom.offsetHeight);
+    console.log(mom.scrollHeight);
+*/
 }
 
 function checked_online_status()
@@ -1319,8 +1397,8 @@ function calc_input(){
             if(isNaN(res)){
                 document.getElementById("calc_output").innerHTML = "error!";
             }else{
-                document.getElementById("calc_output").innerHTML = res;
-                cin.innerHTML = res;
+                document.getElementById("calc_output").innerHTML = res.toFixed(3);
+                cin.innerHTML = res.toFixed(3);
             }
         }
     }else{
@@ -1459,7 +1537,11 @@ function init(){
         calc_btns[i].onclick = calc_input;
     }
 
-    document.addEventListener("keydown", function(e){if(e.keyCode == 27){e.preventDefault();back();}}, false);
+    document.addEventListener("keydown", function(e){if(e.keyCode == 27){
+        e.preventDefault();
+        e.stopPropagation();
+        back();
+        }}, false);
 
     document.getElementById("entry").addEventListener("keyup",function(e){e.preventDefault();if (e.keyCode === 13){send_message();}});
 
@@ -1524,6 +1606,8 @@ function init(){
         document.getElementById("entry").onclick=close_emoji_div;
     }
 
+    document.getElementById("preview-img").onload = preview_img_loaded;
+
     read_local_data('vibrate',function(){}, function(value){
         if(!value){
             write_local_data('vibrate','On',function(e){},function(v){});
@@ -1551,6 +1635,7 @@ window.onload = function(){
             init();
         }, false);
     }
+
 }
 
 
