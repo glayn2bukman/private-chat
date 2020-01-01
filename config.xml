@@ -17,10 +17,11 @@
         <param name="android-package" value="org.apache.cordova.App" />
     </feature>
     
+    <feature name="http://api.phonegap.com/1.0/camera" />
+    <feature name="http://api.phonegap.com/1.0/file" />
+
     <!-- use latest version of phonegap...this version is displayed in the phonegap web -->
     <!-- <preference name="phonegap-version" value="cli-6.5.0" /> -->
-
-    <gap:plugin name="org.apache.cordova.camera" version="0.2.4" />
 
     <allow-navigation href="*" />
     <access origin="*" />
