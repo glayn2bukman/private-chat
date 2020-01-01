@@ -39,7 +39,5 @@
     <plugin name="cordova-plugin-vibration" />
     <plugin name="cordova-plugin-sqlite" />
 
-    <plugin name="cordova-plugin-camera" />
-
 </widget>
 
