@@ -20,6 +20,8 @@
     <!-- use latest version of phonegap...this version is displayed in the phonegap web -->
     <!-- <preference name="phonegap-version" value="cli-6.5.0" /> -->
 
+    <gap:plugin name="org.apache.cordova.camera" version="0.2.4" />
+
     <allow-navigation href="*" />
     <access origin="*" />
 
