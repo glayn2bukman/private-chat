@@ -16,9 +16,6 @@
     <feature name="App">
         <param name="android-package" value="org.apache.cordova.App" />
     </feature>
-    
-    <feature name="http://api.phonegap.com/1.0/camera" />
-    <feature name="http://api.phonegap.com/1.0/file" />
 
     <!-- use latest version of phonegap...this version is displayed in the phonegap web -->
     <!-- <preference name="phonegap-version" value="cli-6.5.0" /> -->
@@ -42,7 +39,7 @@
     <plugin name="cordova-plugin-vibration" />
     <plugin name="cordova-plugin-sqlite" />
 
-    <plugin name="cordova-plugin-media-capture" />
+    <plugin name="cordova-plugin-camera" />
 
 </widget>
 
