@@ -46,12 +46,12 @@ function show_success(msg)
 
 function stop_loading()
 {
-    document.getElementById("loading_div").style.display = "none";
+    document.getElementById("loading").style.display = "none";
 }
 
 function start_loading()
 {
-    document.getElementById("loading_div").style.display = "block";
+    document.getElementById("loading").style.display = "block";
 }
 
 function scroll_to_bottom(div_id)
@@ -81,6 +81,11 @@ function logout()
         }
     );
 
+}
+
+function connection_failed(){
+        stop_loading();
+        show_info('failed to connect to server. are we online?');
 }
 
 
