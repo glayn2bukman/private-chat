@@ -1701,6 +1701,29 @@ function captureImage(){
     }
 }
 
+function captureAudio(){
+    // capture callback
+    var captureSuccess = function(mediaFiles) {
+
+        if(mediaFiles.length){
+            notify(mediaFiles[0].fullPath);
+        }
+
+    };
+
+    // capture error callback
+    var captureError = function(error) {
+        navigator.notification.alert('Error code: ' + error.code, null, 'Capture Error');
+    };
+
+    try{
+        // start audio capture
+        navigator.device.capture.captureAudio(captureSuccess, captureError, {limit:1});
+    }catch(e){
+        notify(e);
+    }
+}
+
 
 // *****************************************************************************
 function init(){
