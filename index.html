@@ -302,7 +302,7 @@
             </div>
         </div>
 
-        <div id="emoji_div" style="display:none;">
+        <div id="emoji_div" style="display:none2;">
             <span style="
                 position:fixed;
                 bottom:295px;
@@ -313,7 +313,12 @@
                 color:green;
                 z-index: -10;
                 text-align:center;
-            " onclick="document.getElementById('files').click()">attach media</span>
+            ">
+                <img class="media-ico" src="static/icons/camera.png">
+                <img class="media-ico" src="static/icons/video.png">
+                <img class="media-ico" src="static/icons/audio.png" onclick="audioCapture()">
+                <img class="media-ico" src="static/icons/gallery.png" onclick="document.getElementById('files').click()">
+            </span> 
 
             <span style="
                 position:fixed;
