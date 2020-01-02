@@ -41,7 +41,6 @@
     <plugin name="cordova-plugin-device" />
 
     <plugin name="cordova-plugin-media-capture" source="npm" spec="2.0.0"/>
-    <plugin name="cordova-plugin-file-transfer" spec="~1.7.0" />
     <plugin name="cordova-plugin-media" spec="~4.0.0" />
     <plugin name="cordova-plugin-camera" source="npm" spec="~2.4.1" />
 
