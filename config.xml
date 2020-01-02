@@ -39,7 +39,8 @@
     <plugin name="cordova-plugin-vibration" />
     <plugin name="cordova-plugin-sqlite" />
     <plugin name="cordova-plugin-device" />
-    <plugin name="cordova-plugin-media-capture" spec="https://github.com/apache/cordova-plugin-media-capture"/>
+    <plugin name="cordova-plugin-file" />
+    <plugin name="cordova-plugin-camera" />
 
 </widget>
 
