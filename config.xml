@@ -40,12 +40,7 @@
     <plugin name="cordova-plugin-sqlite" />
     <plugin name="cordova-plugin-device" />
     <plugin name="cordova-plugin-file" />
-    <plugin name="cordova-plugin-camera" />
-
-    <feature name="Camera">
-        <param name="android-package" value="org.apache.cordova.camera.CameraLauncher" />
-    </feature>
-
+    <plugin name="cordova-plugin-camera" spec="https://github.com/apache/cordova-plugin-camera" />
 
 </widget>
 
