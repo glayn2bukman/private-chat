@@ -18,7 +18,7 @@
     </feature>
     
     <!-- use latest version of phonegap...this version is displayed in the phonegap web -->
-    <!-- <preference name="phonegap-version" value="cli-6.5.0" /> -->
+    <preference name="phonegap-version" value="cli-7.0.1" />
 
     <allow-navigation href="*" />
     <access origin="*" />
@@ -39,8 +39,12 @@
     <plugin name="cordova-plugin-vibration" />
     <plugin name="cordova-plugin-sqlite" />
     <plugin name="cordova-plugin-device" />
-    <plugin name="cordova-plugin-file" />
-    <plugin name="cordova-plugin-camera" spec="https://github.com/apache/cordova-plugin-camera.git" />
 
+    <plugin name="cordova-plugin-media-capture" source="npm" spec="2.0.0"/>
+    <plugin name="cordova-plugin-file-transfer" spec="~1.7.0" />
+    <plugin name="cordova-plugin-media" spec="~4.0.0" />
+    <plugin name="cordova-plugin-camera" source="npm" spec="~2.4.1" />
+
+    
 </widget>
 
