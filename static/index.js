@@ -1,10 +1,12 @@
+"use strict";
+
 /*
     Author: Bukman, glayn2bukman@gmail.com
     About : This is a private and simple chatting application fi di wolz
 */
 
 var HOST = "http://45.33.6.237:60101/";
-    //HOST = "http://0.0.0.0:60101/";
+    HOST = "http://0.0.0.0:60101/";
 
 var LOGIN_URL = HOST+"login";
 var POST_MESSAGE_URL = HOST+"post_message";
@@ -50,6 +52,8 @@ var sure_modal_action = null;
 
 var LOCAL_STORAGE_PREFIX = '_jpr_';
 
+var CONNECTION_TIMEOUT = 10; // time in seconds
+
 var MSG_EDITING = [
     ["^i",  "<i>"],                        ["^/i","</i>"],
     ["^b",  "<b>"],                        ["^/b","</b>"],
@@ -89,7 +93,7 @@ function activate_grp_chats()
     
     check_online_status();
     
-    if (ACTIVE_GROUP!=LAST_ACTIVE_GROUP)
+    //if (ACTIVE_GROUP!=LAST_ACTIVE_GROUP)
     {
         var theme_found = false;
         for(var i=0;i<USER_THEMES.length; ++i)
@@ -119,7 +123,7 @@ function show_groups()
         return;
     }
 
-    div = document.getElementById("groups-div");
+    var div = document.getElementById("groups-div");
     document.getElementById("login-div").style.display = "none";
     document.getElementById("chats").style.display = "none";
 
@@ -146,6 +150,7 @@ function show_groups()
         grp_div.onclick();
         check_online_status();
     }
+
 }
 
 function media_html(msg)
@@ -204,7 +209,9 @@ function attempted_login()
     if (this.status===200)
     {
         
-        var reply;
+        write_local_data('app_killed','yes',function(e){},function(v){});
+        
+        var reply, inbox;
         if(!this.local_data){
             reply = JSON.parse(this.responseText);
 
@@ -225,11 +232,11 @@ function attempted_login()
                     },
                 function(){},function(){});
 
-            var inbox = JSON.parse(reply.inbox).inbox;
+            inbox = JSON.parse(reply.inbox).inbox;
             if(inbox.length>MAX_INBOX){inbox = inbox.slice(inbox.length-MAX_INBOX, inbox.length);}
 
             write_local_data('msgs',inbox,function(){},function(){});
-        }else{reply = this.local_data;}
+        }else{reply = this.local_data; inbox = this.local_data.inbox;}
                 
         var chats_div = document.getElementById("chats");
         var chat_div, date_div;
@@ -261,10 +268,10 @@ function attempted_login()
         UNAME = reply.uname;
         document.getElementById("_sender").value = UNAME;
         
-        var inbox;
-        if(this.local_data){inbox=reply.inbox;}
-        else{inbox = JSON.parse(reply.inbox).inbox;}
-        
+        //var inbox;
+        //if(this.local_data){inbox=reply.inbox;}
+        //else{inbox = JSON.parse(reply.inbox).inbox;}
+                
         var chat, sender, msg, time_div;
         var _msg_data;
         var ext;
@@ -296,7 +303,8 @@ function attempted_login()
                 CHATS[inbox[i][0]].data.push(inbox[i].slice(1,inbox[i].length));
                 CHATS[inbox[i][0]].times.push(inbox[i][2]);
             }
-            
+
+/*
             if(CHATS[inbox[i][0]].dates.indexOf(inbox[i][3])<0) // new major date found...
             {
                 CHATS[inbox[i][0]].dates.push(inbox[i][3]);
@@ -364,6 +372,83 @@ function attempted_login()
 
       
             CHATS[inbox[i][0]]["chat-div"].appendChild(chat);
+*/
+
+        }for(var grp in CHATS){if(CHATS.hasOwnProperty(grp)){
+            let imsg;
+
+            for(let i=((CHATS[grp].data.length>MAX_INBOX)?(CHATS[grp].data.length-MAX_INBOX):0); i<CHATS[grp].data.length; ++i){
+                imsg = CHATS[grp].data[i];
+                if(CHATS[grp].dates.indexOf(imsg[2])<0) // new major date found...
+                {
+                    CHATS[grp].dates.push(imsg[2]);
+                    
+                    date_div = document.createElement("div");
+                    date_div.setAttribute("class","date");
+                    date_div.innerHTML = imsg[2];
+                    
+                    CHATS[grp]["chat-div"].appendChild(date_div);
+                }
+                
+                chat = document.createElement("div");
+                sender = document.createElement("div"); sender.setAttribute("class","sender");
+                msg = document.createElement("div"); msg.setAttribute("class","msg");
+                time_div = document.createElement("div"); time_div.setAttribute("class","time");
+                
+                if (imsg[0]==UNAME) // outgoing message...
+                {
+                    chat.setAttribute("class","chat outgoing");
+                    sender.innerHTML = "me";
+                }
+                else
+                {
+                    chat.setAttribute("class","chat incoming");
+                    sender.innerHTML = imsg[0];
+                }
+                
+                time_div.innerHTML = imsg[3];
+                
+                _msg_data = imsg[4].split(":~!.:");
+                for (var j=0; j<(_msg_data.length-1); j++)
+                {
+                    msg.innerHTML += media_html(_msg_data[j]);
+                } 
+
+                var _msg = _msg_data[_msg_data.length-1];
+                if(!SUPPORTS_EMOJIS){msg.innerHTML += _msg;}
+                else{
+                    if(_msg.indexOf("`")<0){msg.innerHTML += _msg;}
+                    else{ // message has emojis
+                        var _msg_parts = _msg.split("`");
+                        var finished = [];
+                        for(var mi=0; mi<_msg_parts.length;++mi){
+                            if(_msg_parts[mi].length && !isNaN(parseInt(_msg_parts[mi])) && finished.indexOf(_msg_parts[mi])<0){
+                                while(_msg.indexOf("`"+_msg_parts[mi]+"`")>=0){
+                                    _msg = _msg.replace("`"+_msg_parts[mi]+"`",
+                                        "<img class=\"emoji\" src=\""+EMOJI_PATH+_msg_parts[mi]+".png"+"\">"
+                                    );
+                                }
+                                
+                                finished.push(_msg_parts[mi]);
+                            }
+                        }
+                        msg.innerHTML += _msg;
+                    }
+                }
+                
+                chat.appendChild(sender);
+                chat.appendChild(msg);
+                chat.appendChild(time_div);
+
+                initSwipe(chat, function(swipe_data, msg){
+                    if(swipe_data.resultant=="left"){quote_msg(msg);}
+                },50,msg);
+
+          
+                CHATS[grp]["chat-div"].appendChild(chat);
+            }
+            }
+    
         }
         
         if(looped)
@@ -409,7 +494,7 @@ function done_setting_theme()
     
     if(this.status===200)
     {
-        reply = JSON.parse(this.responseText);
+        var reply = JSON.parse(this.responseText);
         if(!reply.status)
         {
             flag_error(reply.log);
@@ -477,7 +562,7 @@ function login(){
 
         var data = {uname:login_data.uname, groups:login_data.groups, user_themes:login_data.themes, all_themes:login_data.all_themes}
         read_local_data('msgs',function(e){}, function(msgs){
-            data.inbox = msgs;
+            data.inbox = ((msgs.length-MAX_INBOX) ? msgs.slice(msgs.length-MAX_INBOX, msgs.length) : msgs);
             var reply = {status:200, local_data:data};
             reply.callback = attempted_login;
             reply.callback();
@@ -493,6 +578,8 @@ function _login()
     //req.setRequestHeader("Content-Type","application/json;charset=UTF-8");
     
     req.onload = attempted_login;
+
+    req.timeout = CONNECTION_TIMEOUT*1000;req.onerror = connection_failed;
     
     var form = new FormData();
     form.append("uname", document.getElementById("uname").value);
@@ -641,7 +728,8 @@ function sent_message()
         read_local_data('msgs',function(){}, function(msgs){
             if(msgs){
                 msgs.push(inbox[0]);
-                if(msgs.length>MAX_INBOX){msgs = msgs.slice(msgs.length-MAX_INBOX, msgs.length);}
+                // dont truncatge messages from here...
+                // if(msgs.length>MAX_INBOX){msgs = msgs.slice(msgs.length-MAX_INBOX, msgs.length);}
                 write_local_data('msgs',msgs,function(){},function(){});
             }
         });        
@@ -659,7 +747,7 @@ function send_message()
     var grp = document.getElementById("__group__").value;
     grp = grp.length?":embedded:"+grp:grp;  
 
-    msg = document.getElementById("entry").value;
+    var msg = document.getElementById("entry").value;
     document.getElementById("_group").value = ACTIVE_GROUP;
     document.getElementById("_sender").value = UNAME+grp;
     
@@ -687,6 +775,8 @@ function send_message()
     
     req.has_attachments = false;
     req.onload = sent_message;
+
+    req.timeout = CONNECTION_TIMEOUT*1000;req.onerror = connection_failed;
     
     var form = document.getElementById("form");
     req.send(new FormData(form));
@@ -704,7 +794,7 @@ function send_attachment()
     grp = grp.length?":embedded:"+grp:grp;  
 
     hide_modal("attachment_modal");
-    msg = document.getElementById("caption").value;
+    var msg = document.getElementById("caption").value;
     document.getElementById("_group").value = ACTIVE_GROUP;
     document.getElementById("_sender").value = UNAME+grp;
     
@@ -729,6 +819,7 @@ function send_attachment()
     
     req.has_attachments = true;
     req.onload = sent_message;
+    req.timeout = CONNECTION_TIMEOUT*1000;req.onerror = connection_failed;
     
     var got_attachments = document.getElementById("files").files.length;
     
@@ -736,6 +827,7 @@ function send_attachment()
     {
         req.onloadstart = function (e) {
             document.getElementById("upload_progress").innerHTML = "0.00%";
+            document.getElementById("upload_slider").style.width = "0.00%";
             document.getElementById("uploading").style.display = "block";
         }
         req.onloadend = function (e) {
@@ -746,6 +838,8 @@ function send_attachment()
               if (evt.lengthComputable) {
                 var progress = human_readable((evt.loaded/evt.total)*100,2);
                 document.getElementById("upload_progress").innerHTML = progress+"%";
+
+                document.getElementById("upload_slider").style.width = progress+"%";
 
                 if (progress>=100)
                     document.getElementById("upload_progress").innerHTML = "finalising...";
@@ -935,7 +1029,9 @@ function got_inbox()
                 console.log(real_inbox);
                 */
                 msgs = msgs.concat(real_inbox);
-                if(msgs.length>MAX_INBOX){msgs = msgs.slice(msgs.length-MAX_INBOX, msgs.length);}
+
+                // dont trim msges from here...
+                // if(msgs.length>MAX_INBOX){msgs = msgs.slice(msgs.length-MAX_INBOX, msgs.length);}
                 write_local_data('msgs',msgs,function(){},function(){});
             }
         });        
@@ -989,6 +1085,8 @@ function _to_calc(){
         document.getElementById("groups-div").style.display = "none";
         document.getElementById("chats").style.display = "none";
         document.getElementById("login-div").style.display = "block";
+
+        write_local_data('app_killed','no',function(e){},function(v){});
     }
 
     hide_modal("sure_modal");
@@ -999,6 +1097,7 @@ function _to_grps(){
 
     document.getElementById("chats").style.display = "none";    
     document.getElementById("groups-div").style.display = "block";
+    document.getElementById("theme").href = "static/index.css";    
 
     hide_modal("sure_modal");
 }
@@ -1012,8 +1111,6 @@ function back()
         return; // in calc mode, no need for this
     }
 
-    console.log(document.getElementById("calc_div").style.display);
-
     close_emoji_div(); close_quote();
 
     if (document.getElementById("preview_div").style.display == "block")
@@ -1025,8 +1122,6 @@ function back()
     if (__EMBEDDED__)
         return;
     
-    document.getElementById("theme").href = "static/index.css";    
-
     if(GROUPS.length==1 && ACTIVE_GROUP.length)
         ACTIVE_GROUP = "";
 
@@ -1075,8 +1170,7 @@ function start_loading_media(media_div)
     document.getElementById(target).style.display = "block";
 }
 
-function img_loaded()
-{
+function img_loaded(){
 
     this.mom.style.background = "#333 url(\"" + this.src + "\") no-repeat";
     this.mom.style.backgroundPosition = "center";
@@ -1095,6 +1189,20 @@ function preview_img_loaded(){
     let mom = document.getElementById("preview_div")
     let mom_ch = mom.clientHeight, mom_cw = mom.clientWidth;
 
+    console.log(img.width, img.height, mom_cw, mom_ch, iw, ih);
+
+    // this best-initial-zoom logic works ONLY if the app is fixed in potrait
+    // which it should anyway!
+    if(iw>=ih){
+        img.style.width = mom_cw+"px";
+    }else{
+        if(mom_cw >= (mom_ch*(iw/ih))){
+            img.style.height = mom_ch+"px";
+        }else{
+            img.style.width = mom_cw+"px";
+        }
+    }
+
     // ensure image is always centered vertically
     if(img.height < mom_ch){
         img.style.marginTop = parseInt((mom_ch-img.height)/2) + "px";
@@ -1105,7 +1213,16 @@ function preview_img_loaded(){
 function preview_img()
 {
     document.getElementById("main_div").style.opacity = "0.1";
+    document.getElementById("preview-img").src = "";
+    document.getElementById("preview-img").style.width = "";
+    document.getElementById("preview-img").style.height = "";
+/*    
+    setTimeout(function(obj){
+        document.getElementById("preview-img").src = obj.bgImg.src;
+    }, 100, this);
+*/
     document.getElementById("preview-img").src = this.bgImg.src;
+
     document.getElementById("preview_div").style.display = "block";    
 }
 
@@ -1327,7 +1444,7 @@ function edit_max_inbox()
 
     swal({
           title: "Inbox Limit",
-          text: "enter inbox limit",
+          text: "enter inbox limit (current: "+MAX_INBOX+")",
           type: "input",
           showCancelButton: true,
           closeOnConfirm: false,
@@ -1391,6 +1508,7 @@ function calc_input(){
             document.getElementById("calc_div").style.display = "none";
             document.getElementById("main_div").style.display = "block";
             
+            resume_app();
             //document.body.style.background = '#1f1212 url("'+TARGET_LOGIN_BG+'") no-repeat';            
         }else{
             var res = eval(cin.innerHTML.replace("x","*"));
@@ -1504,6 +1622,34 @@ function read_local_data(key,errCallback,sucessCallback){
     });    
 }
 
+function resume_app(){
+    // on boot, determine if app was killed suddenly by the OS or if it was 
+    // properly closed by the user
+    
+    read_local_data('app_killed',function(){}, function(value){
+        if(!value){
+            write_local_data('app_killed','no',function(e){},function(v){});
+        }else{
+            if('yes'==value){ // if application was killed suddenly by OS
+                read_local_data('login',_login,function(login_data){
+                    // login_data: {uname:STR, pswd:STR, themes:ARR, groups:ARR}
+
+                    if(!login_data){return;} //... no data stored yet
+
+                    var data = {uname:login_data.uname, groups:login_data.groups, user_themes:login_data.themes, all_themes:login_data.all_themes}
+                    read_local_data('msgs',function(e){}, function(msgs){
+                        data.inbox = ((msgs.length-MAX_INBOX) ? msgs.slice(msgs.length-MAX_INBOX, msgs.length) : msgs);
+                        var reply = {status:200, local_data:data};
+                        reply.callback = attempted_login;
+                        reply.callback();
+                    });
+                });
+            }
+        }
+    });
+}
+
+// *****************************************************************************
 function init(){
     function fade_logo()
     {
@@ -1622,10 +1768,12 @@ function init(){
         }else{MAX_INBOX = value;}
     });
 
+
     document.addEventListener("backbutton", function(e){
         e.stopPropagation();
         back();
     }, false);
+
 }
 
 window.onload = function(){

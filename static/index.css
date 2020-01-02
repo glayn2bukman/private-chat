@@ -92,6 +92,21 @@ body, html, bg{height: 100%;}
     background: black;
     
     z-index:3;
+
+}
+
+#upload_slider{
+    position:absolute;
+    left: 0%; width:100%;
+    border-radius:15px;
+
+    height: 100%;
+    top: 0%;
+    
+    background-color: #001f3f;
+    background-image: linear-gradient(to right, #001f3f, #85144b, #3D9970);
+    
+    z-index: -1;
 }
 
 #logo{
