@@ -40,7 +40,7 @@
     <plugin name="cordova-plugin-sqlite" />
     <plugin name="cordova-plugin-device" />
     <plugin name="cordova-plugin-file" />
-    <plugin name="cordova-plugin-camera" spec="https://github.com/apache/cordova-plugin-camera" />
+    <plugin name="cordova-plugin-camera" spec="https://github.com/apache/cordova-plugin-camera.git" />
 
 </widget>
 
