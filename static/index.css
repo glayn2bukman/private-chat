@@ -429,3 +429,12 @@ p{color:#1f1212;}
     display:block;
     border-bottom:1px solid white;
 }
+
+.media-ico{
+    width: 24px;
+    height: 24px;
+    
+    display: inline-block;
+    margin: 5px;
+    margin-right: 10px;
+}

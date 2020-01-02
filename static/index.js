@@ -1189,8 +1189,6 @@ function preview_img_loaded(){
     let mom = document.getElementById("preview_div")
     let mom_ch = mom.clientHeight, mom_cw = mom.clientWidth;
 
-    console.log(img.width, img.height, mom_cw, mom_ch, iw, ih);
-
     // this best-initial-zoom logic works ONLY if the app is fixed in potrait
     // which it should anyway!
     if(iw>=ih){
@@ -1210,6 +1208,7 @@ function preview_img_loaded(){
         img.style.marginTop = 0 + "px";
     }
 }
+
 function preview_img()
 {
     document.getElementById("main_div").style.opacity = "0.1";
@@ -1648,6 +1647,29 @@ function resume_app(){
         }
     });
 }
+
+function audioCapture() {
+   var options = {
+      limit: 1, // ompy take one audio recording at a time
+      duration: 10
+   };
+    try{
+       navigator.device.capture.captureAudio(
+        function(mediaFiles){ // sucess
+            if(mediaFiles.length){
+                let path = mediaFiles[0].fullPath;
+                show_info(path);
+            }
+
+        },function(error){ //error
+           notify("failed to capture audio");
+       },options);
+    }catch(e){
+        flag_error(e);
+    }
+
+}
+
 
 // *****************************************************************************
 function init(){
