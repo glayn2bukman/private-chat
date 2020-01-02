@@ -1692,7 +1692,13 @@ function captureImage(){
         }, options);
     }
 
-
+    try{
+        notify(navigator.camera);
+        openCamera();
+    }
+    catch(e){
+        setTimeout(notify, 1000, e);
+    }
 }
 
 
