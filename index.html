@@ -8,6 +8,7 @@
         <title>Private Chat</title>
     
         <link rel="stylesheet" href="static/bootstrap-3.3.7/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" href="static/loading.css">
         <link rel="stylesheet" href="static/index.css">
 
         <!-- jQuery library -->
@@ -82,7 +83,10 @@
             <img id="preview-img" class="img-responsive2" style="margin:0 auto;"/>
         </div>
                 
-        <div id="uploading" style="display:none">Uploading Files: <span id="upload_progress">0.00%</span></div>
+        <div id="uploading" style="display:none;">
+            <span id='upload_slider'></span>
+            Uploading Files: <span id="upload_progress">0.00%</span>
+        </div>
         <div id="notification" style="display:none"></div>
 
         <div class="modal fade" id="attachment_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -360,18 +364,8 @@
 
         </div>
         
-        <div class="rotate" id="loading_div"
-            style="
-                position:fixed; 
-                left:45%; 
-                top:45%; 
-                z-index:5; 
-                font-size:2em;
-                color:#0f0;
-                display: none;
-                ">
-            <strong>....</strong>
-        </div>
+        <div id='loading' class="lds-spinner" style="display:none;"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+
 
         <input type="hidden" id="__uname__">
         <input type="hidden" id="__group__">
