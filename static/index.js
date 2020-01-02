@@ -1648,25 +1648,50 @@ function resume_app(){
     });
 }
 
-function audioCapture() {
-   var options = {
-      limit: 1, // ompy take one audio recording at a time
-      duration: 10
-   };
-    try{
-       navigator.device.capture.captureAudio(
-        function(mediaFiles){ // sucess
-            if(mediaFiles.length){
-                let path = mediaFiles[0].fullPath;
-                show_info(path);
-            }
-
-        },function(error){ //error
-           notify("failed to capture audio");
-       },options);
-    }catch(e){
-        flag_error(e);
+function captureImage(){
+    function setOptions(srcType) {
+        var options = {
+            // Some common settings are 20, 50, and 100
+            quality: 50,
+            destinationType: Camera.DestinationType.FILE_URI,
+            // In this app, dynamically set the picture source, Camera or photo gallery
+            sourceType: srcType,
+            encodingType: Camera.EncodingType.JPEG,
+            mediaType: Camera.MediaType.PICTURE,
+            allowEdit: true,
+            correctOrientation: true  //Corrects Android orientation quirks
+        }
+        return options;
     }
+
+    function createNewFileEntry(imgUri) {
+        window.resolveLocalFileSystemURL(cordova.file.cacheDirectory, function success(dirEntry) {
+
+            // JPEG file
+            dirEntry.getFile("tempFile.jpeg", { create: true, exclusive: false }, function (fileEntry) {
+
+                // Do something with it, like write to it, upload it, etc.
+                // writeFile(fileEntry, imgUri);
+                console.log("got file: " + fileEntry.fullPath);
+                // displayFileData(fileEntry.fullPath, "File copied to");
+
+            }, onErrorCreateFile);
+
+        }, onErrorResolveUrl);
+    }
+
+    function openCamera(selection) {
+
+        var srcType = Camera.PictureSourceType.CAMERA;
+        var options = setOptions(srcType);
+
+        navigator.camera.getPicture(function cameraSuccess(imageUri) {
+            show_info(imageUri);
+        }, function cameraError(error) {
+            flag_error("failed to take pic");
+        }, options);
+    }
+
 
 }
 
