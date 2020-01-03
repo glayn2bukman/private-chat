@@ -1158,19 +1158,32 @@ function start_loading_media(media_div)
     notify("loading media...");
     media_div.style.display = "none";
     
-    if(media_div.getAttribute("mediatype"!="img"))
+    if(media_div.getAttribute("mediatype")!="img")
         document.getElementById(target).src=FILE_ATTACHMENT_PATH+target;
     else
     {
         var bgImg = new Image();
         bgImg.mom = document.getElementById(target);
+
+        let d = document.createElement('div');
+        d.setAttribute('class', 'lds-spinner');
+        d.style.position = "absolute";
+        d.style.left = "59px";
+        d.style.top = "55px";
+        d.innerHTML = "<div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>";
+        
+        document.getElementById(target).parentNode.appendChild(d);
+        bgImg.loading_div = d;
+
         bgImg.onload = img_loaded;
         bgImg.src = FILE_ATTACHMENT_PATH+target;
     }
     document.getElementById(target).style.display = "block";
+
 }
 
 function img_loaded(){
+    this.loading_div.parentNode.removeChild(this.loading_div);
 
     this.mom.style.background = "#333 url(\"" + this.src + "\") no-repeat";
     this.mom.style.backgroundPosition = "center";
