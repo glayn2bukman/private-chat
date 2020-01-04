@@ -74,7 +74,7 @@ body, html, bg{height: 100%;}
 }
 
 #uploading{
-    display: none;
+    display: none2;
     position:fixed;
     
     width: 90%;

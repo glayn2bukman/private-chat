@@ -10,6 +10,7 @@ var HOST = "http://45.33.6.237:60101/";
 
 var LOGIN_URL = HOST+"login";
 var POST_MESSAGE_URL = HOST+"post_message";
+var POST_MESSAGE_WITH_ATTACHMENT_URL = HOST+"post_message_with_attachment";
 var INBOX_URL = HOST+"inbox";
 var UPDATE_ACCOUNT_URL = HOST+"update_account";
 var ONLINE_STATE_URL = HOST+"activity_status";
@@ -68,6 +69,27 @@ var MSG_EDITING = [
 ];
 
 var CLICK_TIMER = null;
+
+function generate_reference_id(fname){
+    let xters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    xters += xters.toLowerCase();
+    xters += "0123456789";
+    
+    let _id = "";
+    
+    let i=0;
+    while(i<8){
+        _id += xters[Math.floor(Math.random() * (xters.length-1 - 0 + 1) + 0)];
+        ++i;
+    }
+
+    if(fname.indexOf('.')>=0){
+        let _ = fname.split('.');
+        _id += '.'+_[_.length-1];
+    }
+    
+    return _id;
+}
 
 function activate_grp_chats()
 {
@@ -208,7 +230,7 @@ function attempted_login()
 
     if (this.status===200)
     {
-        
+
         write_local_data('app_killed','yes',function(e){},function(v){});
         
         var reply, inbox;
@@ -303,76 +325,6 @@ function attempted_login()
                 CHATS[inbox[i][0]].data.push(inbox[i].slice(1,inbox[i].length));
                 CHATS[inbox[i][0]].times.push(inbox[i][2]);
             }
-
-/*
-            if(CHATS[inbox[i][0]].dates.indexOf(inbox[i][3])<0) // new major date found...
-            {
-                CHATS[inbox[i][0]].dates.push(inbox[i][3]);
-                
-                date_div = document.createElement("div");
-                date_div.setAttribute("class","date");
-                date_div.innerHTML = inbox[i][3];
-                
-                CHATS[inbox[i][0]]["chat-div"].appendChild(date_div);
-            }
-            
-            chat = document.createElement("div");
-            sender = document.createElement("div"); sender.setAttribute("class","sender");
-            msg = document.createElement("div"); msg.setAttribute("class","msg");
-            time_div = document.createElement("div"); time_div.setAttribute("class","time");
-            
-            if (inbox[i][1]==UNAME) // outgoing message...
-            {
-                chat.setAttribute("class","chat outgoing");
-                sender.innerHTML = "me";
-            }
-            else
-            {
-                chat.setAttribute("class","chat incoming");
-                sender.innerHTML = inbox[i][1];
-            }
-            
-            time_div.innerHTML = inbox[i][4];
-            
-            _msg_data = inbox[i][5].split(":~!.:");
-            for (var j=0; j<(_msg_data.length-1); j++)
-            {
-                msg.innerHTML += media_html(_msg_data[j]);
-            } 
-
-            var _msg = _msg_data[_msg_data.length-1];
-            if(!SUPPORTS_EMOJIS){msg.innerHTML += _msg;}
-            else{
-                if(_msg.indexOf("`")<0){msg.innerHTML += _msg;}
-                else{ // message has emojis
-                    var _msg_parts = _msg.split("`");
-                    var finished = [];
-                    for(var mi=0; mi<_msg_parts.length;++mi){
-                        if(_msg_parts[mi].length && !isNaN(parseInt(_msg_parts[mi])) && finished.indexOf(_msg_parts[mi])<0){
-                            while(_msg.indexOf("`"+_msg_parts[mi]+"`")>=0){
-                                _msg = _msg.replace("`"+_msg_parts[mi]+"`",
-                                    "<img class=\"emoji\" src=\""+EMOJI_PATH+_msg_parts[mi]+".png"+"\">"
-                                );
-                            }
-                            
-                            finished.push(_msg_parts[mi]);
-                        }
-                    }
-                    msg.innerHTML += _msg;
-                }
-            }
-            
-            chat.appendChild(sender);
-            chat.appendChild(msg);
-            chat.appendChild(time_div);
-
-            initSwipe(chat, function(swipe_data, msg){
-                if(swipe_data.resultant=="left"){quote_msg(msg);}
-            },50,msg);
-
-      
-            CHATS[inbox[i][0]]["chat-div"].appendChild(chat);
-*/
 
         }for(var grp in CHATS){if(CHATS.hasOwnProperty(grp)){
             let imsg;
@@ -604,8 +556,8 @@ function sent_message()
         if(this.has_attachments)
             document.getElementById("caption").value = "";
         
-        document.getElementById('form').reset();
-        
+        //document.getElementById('form').reset();
+                
         var reply = JSON.parse(this.responseText);
         
         if (!reply.status)
@@ -778,7 +730,7 @@ function send_message()
 
     req.timeout = CONNECTION_TIMEOUT*1000;req.onerror = connection_failed;
     
-    var form = document.getElementById("form");
+    var form = document.getElementById("myDropTarget");
     req.send(new FormData(form));
     
     document.getElementById("entry").value = "";
@@ -848,7 +800,7 @@ function send_attachment()
             }, false);
     }
     
-    var form = document.getElementById("form");
+    var form = document.getElementById("myDropTarget");
     req.send(new FormData(form));    
 
     close_emoji_div(); close_quote();
@@ -861,6 +813,40 @@ function cancel_attachment()
     document.getElementById('form').reset();
     hide_modal("attachment_modal");
 }
+
+function send_message_with_attachment(){
+    var grp = document.getElementById("__group__").value;
+    grp = grp.length?":embedded:"+grp:grp;  
+
+    hide_modal("attachment_modal");
+    var msg = document.getElementById("caption").value;
+    document.getElementById("_group").value = ACTIVE_GROUP;
+    document.getElementById("_sender").value = UNAME+grp;
+    
+    if( document.getElementById("quoted").style.display=="block" &&
+        document.getElementById("quoted_msg").innerHTML.length){
+        msg = "<span class=\"quoted\">"+document.getElementById("quoted_msg").innerHTML+"</span>"+msg;
+    }
+
+    if(!msg.length)
+        msg = " "; // there MUST be a message
+
+    // edit msgs for special inline visual changes...
+    for(var mi=0; mi<MSG_EDITING.length; ++mi){
+        while(msg.indexOf(MSG_EDITING[mi][0])>=0){msg = msg.replace(MSG_EDITING[mi][0],MSG_EDITING[mi][1]);}
+    }
+
+    document.getElementById('_msg').value = msg;
+/*
+    document.getElementById("upload_progress").innerHTML = "0.00%";
+    document.getElementById("upload_slider").style.width = "0.00%";
+    document.getElementById("uploading").style.display = "block";
+*/
+    document.getElementById('myDropTarget').click(); // trigger click to start uploading files with Dropzone.js
+    
+    close_emoji_div(); close_quote();
+}
+
 
 function got_inbox()
 {
@@ -1862,7 +1848,6 @@ function init(){
         e.stopPropagation();
         back();
     }, false);
-
 }
 
 window.onload = function(){
