@@ -7,6 +7,7 @@
 
 var HOST = "http://45.33.6.237:60101/";
     //HOST = "http://0.0.0.0:60101/";
+    HOST = "http://192.168.43.208:60101/";
 
 var LOGIN_URL = HOST+"login";
 var POST_MESSAGE_URL = HOST+"post_message";
@@ -69,6 +70,8 @@ var MSG_EDITING = [
 ];
 
 var CLICK_TIMER = null;
+
+var DROPZONE_TARGET = null;
 
 function generate_reference_id(fname){
     let xters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -208,7 +211,8 @@ function media_html(msg)
     }
 
     else if(
-        msg.toLowerCase().indexOf(".mp4")>=0
+        msg.toLowerCase().indexOf(".mp4")>=0 ||
+        msg.toLowerCase().indexOf(".webm")>=0
         // video attachment
         )
     {
@@ -217,7 +221,7 @@ function media_html(msg)
                          "onclick=\"start_loading_media(this)\">Video</div>"+
                          "<video controls style=\"width:100%; display:none; margin-bottom:10px;\" id=\""+
                          msg+
-                         "\"><source src=\""+FILE_ATTACHMENT_PATH+msg+"\" type=\"video/mp4\"> {brocken video}</video><br>";
+                         "\"><source src=\""+FILE_ATTACHMENT_PATH+msg+"\"> {brocken video}</video><br>";
     }
     
     return innerHTML;
@@ -730,81 +734,13 @@ function send_message()
 
     req.timeout = CONNECTION_TIMEOUT*1000;req.onerror = connection_failed;
     
-    var form = document.getElementById("myDropTarget");
+    var form = document.getElementById("msgForm");
     req.send(new FormData(form));
     
     document.getElementById("entry").value = "";
     start_loading();
 
     close_emoji_div(); close_quote();
-}
-
-function send_attachment()
-{
-    
-    var grp = document.getElementById("__group__").value;
-    grp = grp.length?":embedded:"+grp:grp;  
-
-    hide_modal("attachment_modal");
-    var msg = document.getElementById("caption").value;
-    document.getElementById("_group").value = ACTIVE_GROUP;
-    document.getElementById("_sender").value = UNAME+grp;
-    
-    if( document.getElementById("quoted").style.display=="block" &&
-        document.getElementById("quoted_msg").innerHTML.length){
-        msg = "<span class=\"quoted\">"+document.getElementById("quoted_msg").innerHTML+"</span>"+msg;
-    }
-
-    if(!msg.length)
-        msg = " "; // there MUST be a message
-
-    // edit msgs for special inline visual changes...
-    for(var mi=0; mi<MSG_EDITING.length; ++mi){
-        while(msg.indexOf(MSG_EDITING[mi][0])>=0){msg = msg.replace(MSG_EDITING[mi][0],MSG_EDITING[mi][1]);}
-    }
-
-    document.getElementById('_msg').value = msg;
-
-    var req = new XMLHttpRequest();
-    
-    req.open("post", POST_MESSAGE_URL, true);
-    
-    req.has_attachments = true;
-    req.onload = sent_message;
-    req.timeout = CONNECTION_TIMEOUT*1000;req.onerror = connection_failed;
-    
-    var got_attachments = document.getElementById("files").files.length;
-    
-    if (got_attachments)
-    {
-        req.onloadstart = function (e) {
-            document.getElementById("upload_progress").innerHTML = "0.00%";
-            document.getElementById("upload_slider").style.width = "0.00%";
-            document.getElementById("uploading").style.display = "block";
-        }
-        req.onloadend = function (e) {
-            document.getElementById("uploading").style.display = "none";
-        }
-
-        req.upload.addEventListener("progress", function(evt){
-              if (evt.lengthComputable) {
-                var progress = human_readable((evt.loaded/evt.total)*100,2);
-                document.getElementById("upload_progress").innerHTML = progress+"%";
-
-                document.getElementById("upload_slider").style.width = progress+"%";
-
-                if (progress>=100)
-                    document.getElementById("upload_progress").innerHTML = "finalising...";
-
-              }
-            }, false);
-    }
-    
-    var form = document.getElementById("myDropTarget");
-    req.send(new FormData(form));    
-
-    close_emoji_div(); close_quote();
-
 }
 
 function cancel_attachment()
@@ -820,8 +756,8 @@ function send_message_with_attachment(){
 
     hide_modal("attachment_modal");
     var msg = document.getElementById("caption").value;
-    document.getElementById("_group").value = ACTIVE_GROUP;
-    document.getElementById("_sender").value = UNAME+grp;
+    DROPZONE_TARGET.children[0].value = ACTIVE_GROUP;
+    DROPZONE_TARGET.children[1].value = UNAME+grp;
     
     if( document.getElementById("quoted").style.display=="block" &&
         document.getElementById("quoted_msg").innerHTML.length){
@@ -836,13 +772,9 @@ function send_message_with_attachment(){
         while(msg.indexOf(MSG_EDITING[mi][0])>=0){msg = msg.replace(MSG_EDITING[mi][0],MSG_EDITING[mi][1]);}
     }
 
-    document.getElementById('_msg').value = msg;
-/*
-    document.getElementById("upload_progress").innerHTML = "0.00%";
-    document.getElementById("upload_slider").style.width = "0.00%";
-    document.getElementById("uploading").style.display = "block";
-*/
-    document.getElementById('myDropTarget').click(); // trigger click to start uploading files with Dropzone.js
+    DROPZONE_TARGET.children[2].value = msg;
+
+    DROPZONE_TARGET.click(); // trigger click to start uploading files with Dropzone.js
     
     close_emoji_div(); close_quote();
 }
