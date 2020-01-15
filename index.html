@@ -243,16 +243,40 @@
                 </div>
                 
                 <div id="bottom" class="input-group bottom">
-                        <form method="POST" id="myDropTarget" enctype="multipart/form-data" class="dropzone dz-clickable" style="display:none;">
-                            <!--
-                            <input id="files" name="files" type="file" multiple 
-                                style="display:none;" onchange="show_modal('attachment_modal')">
-                            -->
+                        <form method="POST" id="msgForm" style="display:none;">
                             <input type="hidden" id="_group" name="group">
                             <input type="hidden" id="_sender" name="sender">
                             <input type="hidden" id="_msg" name="msg">
+                        </form>
+
+                        <form method="POST" id="cameraDropTarget" enctype="multipart/form-data" class="dropzone dz-clickable" style="display:none;">
+                            <input type="hidden" name="group">
+                            <input type="hidden" name="sender">
+                            <input type="hidden" name="msg">
                             <span id="fname"></span>
                         </form>
+
+                        <form method="POST" id="videoDropTarget" enctype="multipart/form-data" class="dropzone dz-clickable" style="display:none;">
+                            <input type="hidden" name="group">
+                            <input type="hidden" name="sender">
+                            <input type="hidden" name="msg">
+                            <span id="fname"></span>
+                        </form>
+
+                        <form method="POST" id="audioDropTarget" enctype="multipart/form-data" class="dropzone dz-clickable" style="display:none;">
+                            <input type="hidden" name="group">
+                            <input type="hidden" name="sender">
+                            <input type="hidden" name="msg">
+                            <span id="fname"></span>
+                        </form>
+
+                        <form method="POST" id="galleryDropTarget" enctype="multipart/form-data" class="dropzone dz-clickable" style="display:none;">
+                            <input type="hidden" name="group">
+                            <input type="hidden" name="sender">
+                            <input type="hidden" name="msg">
+                            <span id="fname"></span>
+                        </form>
+
                     <span class="input-group-addon">
                         <i class="glyphicon glyphicon-cog"
                             onclick="show_modal('settings_modal');"></i>
@@ -319,10 +343,10 @@
                 z-index: -10;
                 text-align:center;
             ">
-                <img class="media-ico" src="static/icons/camera.png" onclick="captureImage()">
-                <img class="media-ico" src="static/icons/video.png">
-                <img class="media-ico" src="static/icons/audio.png" onclick="captureAudio()">
-                <img class="media-ico" src="static/icons/gallery.png" onclick="show_modal('attachment_modal');">
+                <img class="media-ico" src="static/icons/camera.png" onclick="DROPZONE_TARGET=document.getElementById('cameraDropTarget'); show_modal('attachment_modal');">
+                <img class="media-ico" src="static/icons/video.png" onclick="DROPZONE_TARGET=document.getElementById('videoDropTarget'); show_modal('attachment_modal');">
+                <img class="media-ico" src="static/icons/audio.png" onclick="DROPZONE_TARGET=document.getElementById('audioDropTarget'); show_modal('attachment_modal');">
+                <img class="media-ico" src="static/icons/gallery.png" onclick="DROPZONE_TARGET=document.getElementById('galleryDropTarget'); show_modal('attachment_modal');">
             </span> 
 
             <span style="
@@ -383,7 +407,7 @@
         <!-- zib with dropzone.js is that u gotta init it the moment u include d script. we cant wait for window.onload -->
         <script src="static/dropzone.min.js"></script>
         <script>
-            Dropzone.options.myDropTarget = { // my form's id is myDropTarget
+            Dropzone.options.galleryDropTarget = { // my form's id is galleryDropTarget
                 paramName: 'file',
                 chunking: true,
                 forceChunking: true,
@@ -422,7 +446,75 @@
                     });
                 }
             }
-        
+
+            Dropzone.options.cameraDropTarget = {
+                paramName:'file',chunking:true,forceChunking:true,url:POST_MESSAGE_WITH_ATTACHMENT_URL,maxFilesize:1025,chunkSize:1000000,
+                
+                acceptedFiles: 'image/*',
+                capture: 'camera',
+
+                init: function() {
+                    this.on("queuecomplete", function(file){document.getElementById("uploading").style.display = "none";});
+                    this.on("uploadprogress", function(file,progress,bytesSent){
+                        if(bytesSent>file.size) bytesSent = file.size;
+                        let _progress = ((bytesSent/file.size)*100).toFixed(2);
+                        document.getElementById("upload_progress").innerHTML = _progress+"%";
+                        document.getElementById("upload_slider").style.width = _progress+"%";
+                        document.getElementById("uploading").style.display = "block";
+                        if(bytesSent>=file.size) {
+                            console.log(file.xhr.responseText);
+                            let obj = {status:200,has_attachments:true,responseText:file.xhr.responseText,callback:sent_message,};
+                            obj.callback();
+                        }
+                    });
+                }
+            }
+
+            Dropzone.options.videoDropTarget = {
+                paramName:'file',chunking:true,forceChunking:true,url:POST_MESSAGE_WITH_ATTACHMENT_URL,maxFilesize:1025,chunkSize:1000000,
+                
+                acceptedFiles: 'video/*',
+                capture: 'camcoder',
+
+                init: function() {
+                    this.on("queuecomplete", function(file){document.getElementById("uploading").style.display = "none";});
+                    this.on("uploadprogress", function(file,progress,bytesSent){
+                        if(bytesSent>file.size) bytesSent = file.size;
+                        let _progress = ((bytesSent/file.size)*100).toFixed(2);
+                        document.getElementById("upload_progress").innerHTML = _progress+"%";
+                        document.getElementById("upload_slider").style.width = _progress+"%";
+                        document.getElementById("uploading").style.display = "block";
+                        if(bytesSent>=file.size) {
+                            console.log(file.xhr.responseText);
+                            let obj = {status:200,has_attachments:true,responseText:file.xhr.responseText,callback:sent_message,};
+                            obj.callback();
+                        }
+                    });
+                }
+            }
+
+            Dropzone.options.audioDropTarget = {
+                paramName:'file',chunking:true,forceChunking:true,url:POST_MESSAGE_WITH_ATTACHMENT_URL,maxFilesize:1025,chunkSize:1000000,
+                
+                acceptedFiles: 'audio/*',
+                capture: 'microphone',
+
+                init: function() {
+                    this.on("queuecomplete", function(file){document.getElementById("uploading").style.display = "none";});
+                    this.on("uploadprogress", function(file,progress,bytesSent){
+                        if(bytesSent>file.size) bytesSent = file.size;
+                        let _progress = ((bytesSent/file.size)*100).toFixed(2);
+                        document.getElementById("upload_progress").innerHTML = _progress+"%";
+                        document.getElementById("upload_slider").style.width = _progress+"%";
+                        document.getElementById("uploading").style.display = "block";
+                        if(bytesSent>=file.size) {
+                            console.log(file.xhr.responseText);
+                            let obj = {status:200,has_attachments:true,responseText:file.xhr.responseText,callback:sent_message,};
+                            obj.callback();
+                        }
+                    });
+                }
+            }        
         </script>
 
     </body>
