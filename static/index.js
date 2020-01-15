@@ -7,7 +7,7 @@
 
 var HOST = "http://45.33.6.237:60101/";
     //HOST = "http://0.0.0.0:60101/";
-    HOST = "http://192.168.43.208:60101/";
+    //HOST = "http://192.168.43.208:60101/";
 
 var LOGIN_URL = HOST+"login";
 var POST_MESSAGE_URL = HOST+"post_message";
