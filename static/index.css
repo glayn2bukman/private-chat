@@ -1,9 +1,11 @@
+/* global-font*/
 body{
     background:#1f1212;
 
     background-position: center;
     background-size: cover;
 
+    font-family:gfont;
 }
 
 body, html, bg{height: 100%;}
@@ -357,9 +359,10 @@ p{color:#1f1212;}
 .calc_btn{
     float:left;
     width:21%;
-    border-radius:50%;
-    border-bottom:1px solid #aaa;
-    
+    border-radius:40%;
+
+    /*border-bottom:1px solid #aaa;*/
+        
     text-align:center;
 
     font-size:3em;
@@ -369,7 +372,10 @@ p{color:#1f1212;}
     color: #ccc;
 }
 
-.calc_btn:hover{cursor:pointer;}
+.calc_btn:hover{
+    cursor:pointer;
+    background-color: rgba(200,200,200,0.7);
+}
 
 #emoji_div{
     position:fixed;
